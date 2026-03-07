@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Toxic Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root { --bg-body: transparent; --bg-panel: rgba(26,26,32,0.85); --bg-card: rgba(35,35,42,0.9); --primary: #ff7e5f; --accent-gold: #feb47b; --accent-toxic: #00d2d3; --text-main: #ffffff; --text-sec: #a0a0b0; --radius: 16px; --border: 1px solid rgba(255,255,255,0.08); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; } 
+        
+        body { background: #0f0f13; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); position: relative; }
+        
+        #ambient-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; pointer-events: none; overflow: hidden; background: #0f0f13; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; animation: floatBlob 20s infinite alternate ease-in-out; }
+        .blob-1 { width: 400px; height: 400px; background: var(--primary); top: -100px; left: -100px; animation-delay: 0s; }
+        .blob-2 { width: 500px; height: 500px; background: var(--accent-toxic); bottom: -150px; right: -100px; animation-delay: -5s; }
+        .blob-3 { width: 300px; height: 300px; background: #a55eea; top: 40%; left: 40%; animation-delay: -10s; opacity: 0.2; }
+        @keyframes floatBlob { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(50px, 100px) scale(1.2); } 100% { transform: translate(-50px, 50px) scale(0.9); } }
+
+        #tension-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; opacity: 0; background: radial-gradient(circle at center, rgba(255, 71, 87, 0.4) 0%, transparent 80%); transition: opacity 1s ease; }
+        .tension-pulse { animation: heartbeat 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes heartbeat { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(1.1); opacity: 1; } }
+
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f0f13; z-index: 99999; display: flex; justify-content: center; align-items: center; transition: opacity 0.8s ease-out; flex-direction: column; }
+        .loader-content { text-align: center; width: 80%; max-width: 300px; }
+        .toxic-logo-anim { font-size: 80px; margin-bottom: 20px; animation: pulseToxic 2s infinite; filter: drop-shadow(0 0 15px var(--accent-toxic)); }
+        .glitch-text { font-size: 24px; margin: 0 0 30px 0; letter-spacing: 2px; font-weight: 800; color: white; }
+        .loading-bar-container { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; position: relative; }
+        .loading-bar { width: 100%; height: 100%; background: linear-gradient(90deg, var(--accent-toxic), var(--primary)); position: absolute; left: -100%; animation: loadBar 2s infinite; }
+        .loading-status { color: var(--text-sec); font-size: 12px; margin-top: 10px; font-family: monospace; animation: blink 1s infinite; }
+        @keyframes pulseToxic { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; filter: drop-shadow(0 0 25px var(--primary)); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes loadBar { 0% { left: -100%; } 50% { left: 0; } 100% { left: 100%; } }
+
+        .flash-lightning { animation: flashWhite 1s ease-out; }
+        @keyframes flashWhite { 0%, 50%, 100% { background-color: #0f0f13; } 25%, 75% { background-color: #fff; } }
+        
+        .shake-explosion { animation: shakeExplo 0.5s cubic-bezier(.36,.07,.19,.97) both; background-color: rgba(255,50,0,0.3) !important; }
+        @keyframes shakeExplo { 10%, 90% { transform: translate3d(-5px, 0, 0); } 20%, 80% { transform: translate3d(5px, 5px, 0); } 30%, 50%, 70% { transform: translate3d(-10px, -5px, 0); } 40%, 60% { transform: translate3d(10px, 5px, 0); } }
+
+        .vip-glow { border: 2px solid var(--accent-gold) !important; box-shadow: 0 0 10px var(--accent-gold), inset 0 0 10px rgba(255, 215, 0, 0.3) !important; animation: vipPulse 1.5s infinite alternate; }
+        @keyframes vipPulse { 0% { box-shadow: 0 0 5px var(--accent-gold), inset 0 0 5px rgba(255, 215, 0, 0.2); } 100% { box-shadow: 0 0 25px #ff8c00, inset 0 0 15px rgba(255, 140, 0, 0.6); border-color: #ff8c00; } }
+
+        .marco-neon { border: 3px solid #00d2d3 !important; box-shadow: 0 0 15px #00d2d3, inset 0 0 10px #00d2d3 !important; padding: 3px; }
+        .marco-fuego { border: 3px solid #ff7e5f !important; box-shadow: 0 0 15px #ff7e5f, inset 0 0 10px #ff7e5f !important; padding: 3px; animation: pulseFuego 1s infinite alternate; }
+        @keyframes pulseFuego { from{box-shadow: 0 0 5px #ff7e5f;} to{box-shadow: 0 0 25px #ff7e5f;} }
+        .marco-toxico { border: 3px dashed #00d2d3 !important; filter: drop-shadow(0 0 8px #00d2d3); padding: 3px; }
+        .marco-oro { border: 3px solid #FFD700 !important; box-shadow: 0 0 20px #FFD700 !important; padding: 3px; }
+        
+        .marco-legend { border: 4px solid transparent !important; background-image: linear-gradient(#0f0f13, #0f0f13), linear-gradient(90deg, #ff7e5f, #00d2d3, #FFD700, #a55eea) !important; background-origin: border-box !important; background-clip: content-box, border-box !important; animation: spinBorder 3s linear infinite; padding: 4px; }
+        @keyframes spinBorder { 100% { filter: hue-rotate(360deg); } }
+
+        .titulo-brillante { color: #fff !important; text-shadow: 0 0 10px #00d2d3, 0 0 20px #a55eea !important; animation: pulseText 2s infinite alternate; }
+        @keyframes pulseText { from { text-shadow: 0 0 5px #00d2d3, 0 0 10px #a55eea; } to { text-shadow: 0 0 15px #ff7e5f, 0 0 20px #FFD700; } }
+
+        #vip-banner-container { position: fixed; top: 15%; left: 0; width: 100%; display: flex; justify-content: center; z-index: 6000; pointer-events: none; }
+        .vip-banner { background: linear-gradient(135deg, #FFD700, #ff8c00); color: #000; padding: 15px 30px; border-radius: 50px; font-size: 18px; font-weight: 900; text-transform: uppercase; box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5); border: 2px solid #fff; animation: vipEnter 4s forwards; text-align: center; }
+        @keyframes vipEnter { 0% { transform: translateY(-50px) scale(0.5); opacity: 0; } 10% { transform: translateY(0) scale(1.1); opacity: 1; } 15% { transform: translateY(0) scale(1); opacity: 1; } 85% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-50px) scale(0.8); opacity: 0; } }
+
+        #btn-toggle-chat { position: fixed; bottom: 100px; left: 20px; background: linear-gradient(135deg, var(--primary), var(--accent-gold)); color: #000; width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 22px; box-shadow: 0 5px 15px rgba(255,126,95,0.4); z-index: 4400; display: none; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s; }
+        #btn-toggle-chat:active { transform: scale(0.9); }
+        .chat-badge { position: absolute; top: -5px; right: -5px; background: #ff4757; color: white; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid var(--bg-body); display: none; }
+        
+        #chat-flotante { position: fixed; bottom: 90px; left: 20px; width: 320px; max-width: calc(100vw - 40px); background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column; z-index: 4500; box-shadow: 0 15px 35px rgba(0,0,0,0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s; transform: translateY(150%) scale(0.9); opacity: 0; pointer-events: none; backdrop-filter: blur(10px); }
+        #chat-flotante.abierto { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+        
+        .chat-header { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid var(--border); cursor: pointer; color: var(--primary); }
+        .chat-messages { height: 250px; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+        .chat-msg { background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 14px; word-wrap: break-word; max-width: 85%; }
+        .chat-msg.mi-msg { background: rgba(255, 126, 95, 0.2); align-self: flex-end; border-bottom-right-radius: 2px; border: 1px solid rgba(255,126,95,0.3); }
+        .chat-msg.otro-msg { align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid rgba(255,255,255,0.1); }
+        .chat-input-row { display: flex; padding: 10px; border-top: 1px solid var(--border); gap: 5px; background: rgba(0,0,0,0.2); border-radius: 0 0 16px 16px; }
+        .chat-input-row input { margin: 0; padding: 10px; font-size: 13px; border-radius: 10px; }
+        .chat-input-row button { width: auto; padding: 10px 15px; border-radius: 10px; }
+
+        .tarjeta-descargable { width: 300px; height: 533px; background: linear-gradient(135deg, #1a1a20, #0f0f13); border: 2px solid var(--primary); border-radius: 20px; padding: 20px; position: relative; text-align: center; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 10px 30px rgba(255, 126, 95, 0.4); margin: 0 auto; overflow: hidden; }
+        .td-logo { font-size: 60px; margin-bottom: 10px; filter: drop-shadow(0 0 10px var(--primary)); }
+        .td-title { font-size: 24px; font-weight: 900; color: white; text-transform: uppercase; margin: 0 0 20px 0; letter-spacing: 1px; }
+        .td-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .td-watermark { font-size: 10px; color: #666; margin-top: 15px; text-transform: uppercase; letter-spacing: 2px; }
+
+        input, textarea { width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: var(--border); border-radius: var(--radius); color: white; margin-bottom: 15px; outline:none; font-family: inherit; resize: none; transition: 0.3s; font-size: 16px; }
+        input:focus, textarea:focus { border-color: var(--primary); background: rgba(255,255,255,0.1); }
+        .btn { padding: 14px; border-radius: var(--radius); border: none; cursor: pointer; font-weight: 700; width: 100%; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; backdrop-filter: blur(5px); }
+        .btn-p { background: linear-gradient(135deg, var(--primary), var(--accent-gold)); color: #1a1a20; }
+        .btn-p:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,126,95,0.3); }
+        .btn-s { background: rgba(255,255,255,0.05); color: var(--text-sec); } .btn-s:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .btn-wpp { background: linear-gradient(135deg, #a55eea, #4bcffa); color: white; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 4000; padding: 10px; padding-bottom: env(safe-area-inset-bottom); }
+        .modal-box { background: var(--bg-panel); padding: 25px; border-radius: 24px; width: 100%; max-width: 480px; border: var(--border); text-align: center; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+
+        .chat-label { font-size: 11px; color: var(--accent-toxic); font-weight: 800; margin-left: 2px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .social-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: var(--border); padding-bottom: 10px; overflow-x: auto; margin-top: 10px; } 
+        .tab-btn { background: none; border: none; color: var(--text-sec); padding: 5px 15px; cursor: pointer; font-weight: bold; font-size: 14px; white-space: nowrap; } 
+        .tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+        
+        #notification-bar { position: fixed; top: -100px; left: 0; width: 100%; background: rgba(35,35,42,0.95); backdrop-filter: blur(10px); border-bottom: 2px solid var(--accent-toxic); color: white; padding: 15px 20px; z-index: 5000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 20px rgba(0,0,0,0.8); transition: top 0.5s ease-in-out; padding-top: calc(15px + env(safe-area-inset-top)); }
+        #notification-bar.show { top: 0; }
+
+        @media (max-width: 600px) { .modal-overlay { padding: 0; align-items: flex-end; } .modal-box { max-width: 100%; width: 100%; border-radius: 24px 24px 0 0; max-height: 95vh; padding: 25px; padding-bottom: calc(25px + env(safe-area-inset-bottom)); } }
+        
+        #pantalla-auth { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f0f13; z-index: 3000; display: flex; justify-content: center; align-items: center; padding-bottom: env(safe-area-inset-bottom); overflow-y:auto; padding:20px; }
+        .auth-box { background: var(--bg-panel); padding: 40px; border-radius: 24px; width: 100%; max-width: 400px; text-align: center; border: var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(10px); margin: auto; }
+        
+        .pwd-container { position: relative; width: 100%; margin-bottom: 15px; }
+        .pwd-container input { width: 100%; padding-right: 45px; margin-bottom: 0; }
+        .pwd-toggle { position: absolute; right: 15px; top: 15px; color: var(--text-sec); cursor: pointer; font-size: 18px; z-index: 10; }
+
+        #sidebar { width: 260px; background: var(--bg-panel); padding: 30px; display: flex; flex-direction: column; border-right: var(--border); backdrop-filter: blur(10px); }
+        #main-content { flex: 1; padding: 40px; overflow-y: auto; padding-bottom: 100px; position: relative; }
+        .mobile-bar { display: none; } 
+        @media (max-width: 900px) { 
+            #sidebar { display: none; } 
+            #main-content { padding: 20px; padding-bottom: calc(90px + env(safe-area-inset-bottom)); } 
+            .mobile-bar { display: flex !important; position: fixed; bottom: 0; left: 0; width: 100%; height: calc(70px + env(safe-area-inset-bottom)); background: var(--bg-panel); backdrop-filter: blur(15px); border-top: var(--border); align-items: flex-start; padding-top: 15px; justify-content: space-around; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); } 
+            .mb-item { display: flex; flex-direction: column; align-items: center; color: var(--text-sec); font-size: 10px; gap: 4px; } .mb-item.active { color: var(--primary); } .mb-item i { font-size: 20px; } 
+        }
+        .nav-item { padding: 15px; color: var(--text-sec); cursor: pointer; border-radius: var(--radius); margin-bottom: 5px; display: flex; gap: 10px; font-weight: 500; } .nav-item.active, .nav-item:hover { background: rgba(255,126,95,0.1); color: var(--primary); }
+        .cards-grid, .room-grid, .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; } .card { background: var(--bg-card); border: var(--border); padding: 20px; border-radius: var(--radius); transition: 0.3s; cursor: pointer; text-align: center; backdrop-filter: blur(5px); } .card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        
+        .game-cover { height: 180px; background: #000; border-radius: var(--radius); display: flex; justify-content: center; align-items: center; font-size: 50px; margin-bottom: 15px; } .lib-rumor { background: linear-gradient(45deg, #ff7e5f, #23232a); color: white; } .lib-secret { background: radial-gradient(circle, #2c3e50, #0f0f13); color: #fff; }
+        .library-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1000px; margin: 0 auto; }
+        .lobby-players { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin: 30px 0; } .player-tile { background: var(--bg-card); padding: 15px; border-radius: 16px; border: var(--border); text-align: center; width: 110px; position: relative; backdrop-filter: blur(5px); } .pt-crown { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 20px; z-index: 10;} .pt-avatar { font-size: 35px; margin-bottom: 10px; border-radius: 50%; width: 60px; height: 60px; display: inline-flex; justify-content: center; align-items: center; }
+        .hist-item { display: flex; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 8px; } .res-win { color: var(--accent-toxic); } .res-loss { color: #ff7675; }
+        #toast-box { position: fixed; bottom: 80px; right: 20px; z-index: 5000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; padding-bottom: env(safe-area-inset-bottom); } .toast { background: var(--bg-panel); padding: 10px 20px; border-radius: 12px; border: 1px solid var(--primary); color: white; animation: slideIn 0.3s; backdrop-filter: blur(10px); } @keyframes slideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+        .section { display: none; animation: fadeIn 0.3s; } .section.active { display: block; } @keyframes fadeIn { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+        .game-header-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 50px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px); }
+        .score-pill { font-size: 14px; color: var(--accent-gold); font-weight: bold; }
+        .progress-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent-gold)); width: 0%; transition: width 0.5s; }
+        .timer-container { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; } .timer-bar { flex: 1; height: 8px; background: #333; border-radius: 4px; overflow: hidden; } .timer-fill { height: 100%; background: #ff7675; width: 100%; } .timer-text { font-family: monospace; color: #ff7675; font-weight: bold; font-size: 16px; width: 35px; text-align: right; }
+        
+        .mode-cards { display: flex; gap: 10px; margin: 20px 0; justify-content: center; }
+        .mode-card { flex: 1; border: 1px solid var(--border); background: rgba(255,255,255,0.05); border-radius: 12px; padding: 15px 5px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
+        .mode-card:hover { background: rgba(255,255,255,0.1); }
+        .mode-card.selected { border-color: var(--primary); background: rgba(255, 126, 95, 0.1); box-shadow: 0 0 15px rgba(255, 126, 95, 0.2); }
+        .mode-icon { font-size: 30px; margin-bottom: 5px; } .mode-title { font-size: 12px; font-weight: bold; color: white; } .mode-points { font-size: 10px; color: var(--accent-gold); }
+        
+        .lobby-mode-panel { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 10px 20px; display: inline-block; margin-bottom: 20px; text-align: center; min-width: 200px; backdrop-filter: blur(5px); }
+        .lmp-label { font-size: 10px; color: var(--text-sec); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+        .lmp-value { font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        .mode-badge { font-size: 10px; padding: 4px 8px; border-radius: 6px; margin-top: 8px; display: inline-block; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .mode-badge.friends { background: rgba(0, 210, 211, 0.15); color: var(--accent-toxic); border: 1px solid rgba(0, 210, 211, 0.3); }
+        .mode-badge.personal { background: rgba(255, 126, 95, 0.15); color: var(--primary); border: 1px solid rgba(255, 126, 95, 0.3); }
+        .mode-badge.secret { background: rgba(165, 94, 234, 0.15); color: #a55eea; border: 1px solid rgba(165, 94, 234, 0.3); }
+        
+        .toast-invite { background: rgba(35,35,42,0.95); border: 1px solid var(--accent-toxic); padding: 15px; border-radius: 16px; width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 10px; pointer-events: auto; backdrop-filter: blur(10px); }
+        .ti-header { font-weight: bold; color: var(--accent-toxic); display: flex; align-items: center; gap: 8px; }
+        .ti-body { font-size: 13px; color: #ddd; }
+        .ti-actions { display: flex; gap: 10px; margin-top: 5px; }
+        
+        input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; outline: none; padding: 0; margin: 0; border: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--primary); cursor: pointer; transition: 0.2s; }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        .recharge-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .recharge-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; border: 1px solid transparent; }
+        .recharge-item:hover { border-color: var(--primary); background: rgba(255,255,255,0.1); }
+        
+        .suggestion-chip { background: rgba(0,210,211,0.1); border: 1px dashed var(--accent-toxic); color: var(--accent-toxic); border-radius: 20px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s; text-align: left; line-height: 1.4; } 
+        .suggestion-chip:hover { background: var(--accent-toxic); color: #000; font-weight: bold; }
+
+        .powerup-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+        .pu-check { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; }
+        .pu-check input { width: 20px; height: 20px; margin: 0; accent-color: var(--primary); cursor: pointer; }
+        
+        #game-reaction-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 1000; }
+        .reaction-bar { display: flex; justify-content: center; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        
+        /* ESTILOS DEL PASE TÓXICO ÉPICO */
+        .reward-box { text-align: center; display: flex; flex-direction: column; align-items: center; transition: 0.3s; width: 100%;}
+        .reward-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; position: relative; font-size: 35px; margin-bottom: 10px; background: rgba(0,0,0,0.5); }
+        .reward-box.locked .reward-circle { filter: grayscale(1) opacity(0.5); }
+        .reward-box.locked .lock-overlay { display: flex; position: absolute; inset: 0; background: rgba(0,0,0,0.7); border-radius: 50%; justify-content: center; align-items: center; font-size: 24px; color: white; }
+        .reward-box.unlocked .lock-overlay { display: none; }
+        .reward-box.unlocked .reward-circle { animation: pulseReward 2s infinite alternate; }
+        .reward-box h4 { margin: 0; font-size: 12px; color: white; }
+        .reward-box p { margin: 5px 0 0 0; font-size: 11px; color: var(--accent-gold); font-weight: bold; }
+        @keyframes pulseReward { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+
+        .mission-neon-card { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 15px; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 8px;}
+        .mission-neon-card .m-title { font-size: 14px; font-weight: bold; color: white; display: flex; justify-content: space-between; }
+        .mission-neon-card .m-xp { color: var(--accent-toxic); font-size: 12px; text-shadow: 0 0 5px var(--accent-toxic); }
+        .mission-bar-bg { width: 100%; height: 8px; background: #222; border-radius: 4px; box-shadow: inset 0 0 5px black; }
+        .mission-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+
+        .tutorial-step { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--primary); text-align: left; }
+        .tutorial-step h4 { margin: 0 0 5px 0; color: var(--accent-toxic); font-size: 15px; }
+        .tutorial-step p { margin: 0; font-size: 13px; color: #ccc; line-height: 1.4; }
+
+        #mode-announcement { position:fixed; top:40%; left:0; width:100%; text-align:center; z-index:9999; display:none; pointer-events:none; }
+        #mode-announce-text { font-size:35px; font-weight:900; color:white; text-shadow: 0 0 20px var(--primary); text-transform:uppercase; animation: popIn 3s forwards; }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 10% { transform: scale(1.2); opacity: 1; } 20% { transform: scale(1); opacity: 1; } 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+        
+        .google-btn-wrap { display: flex; justify-content: center; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <div id="ambient-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+    <div id="tension-bg"></div>
+    <div id="mode-announcement"><div id="mode-announce-text"></div></div>
+    
+    <div id="loading-screen"><div class="loader-content"><div class="toxic-logo-anim">☣️</div><h1 class="glitch-text">TOXIC <span style="color:var(--primary)">PLATFORM</span></h1><div class="loading-bar-container"><div class="loading-bar"></div></div><p class="loading-status">INICIANDO SISTEMA...</p></div></div>
+
+    <div id="vip-banner-container"></div>
+    <button id="btn-toggle-chat" onclick="playClick(); toggleChat()"><i class="fas fa-comments"></i><span id="chat-badge" class="chat-badge">0</span></button>
+    <div id="chat-flotante"><div class="chat-header" onclick="toggleChat()"><span><i class="fas fa-comment-dots"></i> Chat de la Sala</span><i class="fas fa-times" style="color:var(--text-sec);"></i></div><div class="chat-messages" id="chat-messages"><div style="text-align:center; color:#666; font-size:11px; margin-top:10px;">¡Bienvenido al chat!</div></div><div class="chat-input-row"><input type="text" id="chat-input" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') enviarChat()"><button class="btn btn-p" onclick="enviarChat()"><i class="fas fa-paper-plane"></i></button></div></div>
+
+    <audio id="bg-music" loop><source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-boo" src="https://cdn.pixabay.com/audio/2021/08/04/audio_c6ccf3232f.mp3"></audio>
+
+    <div id="notification-bar"><div class="notif-content"><i class="fas fa-robot" style="color: var(--accent-toxic);"></i> <span id="notif-text">El soporte ha respondido tu ticket.</span></div><button class="btn btn-s" style="width: auto; background: rgba(255,255,255,0.1); border: 1px solid white; padding: 5px 15px; font-size: 12px;" onclick="verRespuestaSoporte()">VER</button></div>
+    <div id="toast-box"></div>
+
+    <div id="modal-google-username" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="margin-top:0; color:var(--primary);">¡Casi listo!</h3>
+            <p style="font-size:13px; color:#aaa; margin-bottom:20px;">Hemos vinculado tu cuenta de Google. Elige tu nombre de usuario para entrar a jugar:</p>
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <input id="google-new-user" type="text" placeholder="Tu nombre en el juego" style="margin-bottom:0;">
+                <button class="btn btn-s" style="width:60px; padding:0; font-size:24px;" onclick="lanzarDadoGoogle()" title="Generar Nombre Aleatorio">🎲</button>
+            </div>
+            <p id="error-google-name" style="color:#ff7675; font-size:12px; margin-top:0; margin-bottom:15px; display:none;"></p>
+            <button class="btn btn-p" onclick="playClick(); confirmarNombreGoogle()">Completar Registro</button>
+            <button class="btn btn-s" style="margin-top:10px;" onclick="playClick(); document.getElementById('modal-google-username').style.display='none'">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="modal-share-app" class="modal-overlay"><div class="modal-box"><h3 style="margin-top:0;">Invita a tus Amigos</h3><p style="font-size:12px; color:#aaa; margin-bottom:15px;">Comparte el juego con todos tus contactos.</p>
+        <button class="btn btn-wpp" style="margin-bottom:10px;" onclick="playClick(); enviarAppNativo()"><i class="fas fa-share-alt"></i> Compartir App</button>
+        <button class="btn btn-s" onclick="playClick(); document.getElementById('modal-share-app').style.display='none'">Cerrar</button>
+    </div></div>
+    
+    <div id="modal-share-room" class="modal-overlay"><div class="modal-box"><h3 style="margin-top:0;">Invitar a la Sala</h3><p style="font-size:12px; color:#aaa; margin-bottom:15px;">Dile a tus amigos que entren a jugar contigo ahora mismo.</p>
+        <button class="btn btn-wpp" style="margin-bottom:10px;" onclick="playClick(); enviarLobbyNativo()"><i class="fas fa-share-alt"></i> Compartir Sala</button>
+        <button class="btn btn-s" onclick="playClick(); document.getElementById('modal-share-room').style.display='none'">Cerrar</button>
+    </div></div>
+    
+    <div id="modal-share-result" class="modal-overlay"><div class="modal-box"><h3 style="margin-top:0;">¡Presume tu Toxicidad!</h3>
+        <div id="tarjeta-salseo" class="tarjeta-descargable">
+            <div class="td-logo">🤫</div><div class="td-title">SALSEO DEL DÍA</div>
+            <div class="td-content"><p style="font-size:12px; color:var(--primary); font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">El Mejor Rumor</p><div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; font-style:italic; font-size:18px; line-height:1.4;">"<span id="share-best-rumor">...</span>"</div><div style="margin-top:20px; font-size:14px; color:#aaa;">Escrito por: <strong id="share-best-author" style="color:var(--accent-gold); font-size:16px;">Player</strong></div></div>
+            <div class="td-watermark">Juega gratis en rumortoxic.onrender.com</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+            <button class="btn btn-wpp" onclick="playClick(); enviarSalseoNativo()"><i class="fas fa-share-alt"></i> Enviar a un Amigo</button>
+            <button class="btn btn-p" onclick="playClick(); descargarTarjeta('tarjeta-salseo')"><i class="fas fa-image"></i> Generar Imagen de Instagram</button>
+            <button class="btn btn-s" onclick="playClick(); document.getElementById('modal-share-result').style.display='none'">Volver</button>
+        </div>
+    </div></div>
+
+    <div id="modal-support" class="modal-overlay"><div class="modal-box"><div class="support-header"><div class="support-icon-circle"><i class="fas fa-robot"></i></div><h3 style="color:white; margin:0;">Centro de Ayuda</h3><p style="color:var(--text-sec); font-size:12px; margin:5px 0 0 0;">Reporta bugs o problemas.</p></div><div class="social-tabs"><button class="tab-btn active" onclick="verTabSoporte('nuevo', this)">Nuevo Ticket</button><button class="tab-btn" onclick="verTabSoporte('historial', this); socket.emit('obtenerMisTickets')">Mis Tickets</button></div><div id="tab-soporte-nuevo"><div class="chat-input-area"><span class="chat-label">TU CORREO</span><input id="sup-email" type="email" placeholder="ejemplo@correo.com"><span class="chat-label">MENSAJE</span><textarea id="sup-msg" rows="4" placeholder="Describe tu problema aquí..."></textarea></div><button class="btn" style="background:var(--accent-toxic); color:#000; margin-top:20px; font-weight:800;" onclick="playClick(); enviarSoporte()">ENVIAR TICKET <i class="fas fa-paper-plane"></i></button></div><div id="tab-soporte-historial" style="display:none; text-align:left; width:100%;"><div id="user-tickets-container" style="margin-top:10px;">Cargando...</div></div><button class="btn btn-s" style="margin-top:20px;" onclick="playClick(); document.getElementById('modal-support').style.display='none'">Cerrar</button></div></div>
+    
+    <div id="modal-settings" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Configuración ⚙️</h3>
+            <div class="settings-row"><div class="settings-label"><span>Música</span> <span id="lbl-music">50%</span></div><div class="slider-container"><input type="range" min="0" max="100" value="50" oninput="setMusicVol(this.value)"></div></div>
+            <div class="settings-row"><div class="settings-label"><span>Efectos (SFX)</span> <span id="lbl-sfx">50%</span></div><div class="slider-container"><input type="range" min="0" max="100" value="50" oninput="setSfxVol(this.value)" onchange="playClick()"></div></div>
+            <button class="btn btn-s" style="margin-top:15px; border: 1px solid var(--accent-toxic); color: var(--accent-toxic);" onclick="playClick(); document.getElementById('modal-settings').style.display='none'; document.getElementById('modal-support').style.display='flex'">🎧 Soporte Técnico</button>
+            <button class="btn btn-s" style="margin-top:10px; color:#ff7675; border: 1px solid #ff7675;" onclick="playClick(); logout()">🚪 Cerrar Sesión</button>
+            <button class="btn btn-s" style="margin-top:10px;" onclick="document.getElementById('modal-settings').style.display='none'">Volver</button>
+        </div>
+    </div>
+    
+    <div id="modal-recharge" class="modal-overlay"><div class="modal-box"><h3>Recargar Saldo</h3><div class="recharge-grid"><div class="recharge-item" onclick="playClick(); abrirWhatsApp('coins', 500, 1)"><div style="font-size:24px;"><i class="fas fa-coins" style="color:#FFD700;"></i> 500</div><small>$1.00 USD</small></div><div class="recharge-item" onclick="playClick(); abrirWhatsApp('coins', 1200, 2)"><div style="font-size:24px;"><i class="fas fa-coins" style="color:#FFD700;"></i> 1200</div><small>$2.00 USD</small></div><div class="recharge-item" onclick="playClick(); abrirWhatsApp('toxic', 50, 1)"><div style="font-size:24px;"><i class="fas fa-gem" style="color:#00d2d3;"></i> 50</div><small>$1.00 USD</small></div><div class="recharge-item" onclick="playClick(); abrirWhatsApp('vip', 1, 20)"><div style="font-size:24px;">👑 VIP</div><small>$20.00 USD</small></div></div><p style="font-size:12px; color:#aaa; margin-top:15px;">Serás redirigido a WhatsApp para coordinar tu pago directamente de forma segura.</p><button class="btn btn-s" style="margin-top:20px;" onclick="playClick(); document.getElementById('modal-recharge').style.display='none'">Volver</button></div></div>
+    
+    <div id="modal-create" class="modal-overlay"><div class="modal-box"><h3>Nueva Sala</h3><input id="newRoomName" type="text" placeholder="Nombre (Opcional)"><input id="newRoomPass" type="text" placeholder="Clave (Opcional)"><p style="text-align:left; font-size:12px; color:#888; margin-top:15px;">Elige la Modalidad:</p><div class="mode-cards"><div class="mode-card selected" onclick="playClick(); selectMode(200, this)"><div class="mode-icon">👥</div><div class="mode-title">Amigos</div><div class="mode-points">200 Pts</div></div><div class="mode-card" onclick="playClick(); selectMode(300, this)"><div class="mode-icon">🔥</div><div class="mode-title">Personales</div><div class="mode-points">300 Pts</div></div><div class="mode-card" onclick="playClick(); selectMode(400, this)"><div class="mode-icon">🕵️</div><div class="mode-title">Secretos</div><div class="mode-points">400 Pts</div></div></div><div style="display:flex; gap:10px;"><button class="btn btn-s" onclick="playClick(); document.getElementById('modal-create').style.display='none'">Cancelar</button><button class="btn btn-p" onclick="playClick(); crearSala()">Crear</button></div></div></div>
+    
+    <div id="modal-invite" class="modal-overlay"><div class="modal-box"><h3>Invitar Amigos</h3><div id="invite-list" style="max-height: 200px; overflow-y: auto; margin: 15px 0;"></div><button class="btn btn-s" onclick="playClick(); document.getElementById('modal-invite').style.display='none'">Cerrar</button></div></div>
+    <div id="modal-pass" class="modal-overlay"><div class="modal-box"><h3>Sala Privada 🔒</h3><input id="roomPassInput" type="password" placeholder="Contraseña"><button class="btn btn-p" onclick="playClick(); confirmarIngreso()">Entrar</button><button class="btn btn-s" style="margin-top:10px;" onclick="playClick(); document.getElementById('modal-pass').style.display='none'">Cancelar</button></div></div>
+    <div id="modal-edit-profile" class="modal-overlay"><div class="modal-box"><h3>Tus Iconos</h3><div id="inventory-container" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-top:10px;"></div><h3 style="margin-top:20px; color:var(--accent-toxic);">Tus Marcos</h3><div id="frames-container" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div><h3 style="margin-top:20px; color:var(--accent-gold);">Tus Títulos</h3><div id="titles-container" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;"></div><h3 style="margin-top:20px; color:var(--primary);">Entradas VIP</h3><div id="entries-container" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;"></div><button class="btn btn-s" style="margin-top:20px;" onclick="playClick(); document.getElementById('modal-edit-profile').style.display='none'">Cerrar</button></div></div>
+    
+    <div id="modal-tutorial" class="modal-overlay">
+        <div class="modal-box" style="padding-top:30px; text-align:left;">
+            <h2 style="color:var(--primary); margin-top:0; font-size:26px; text-align:center;">📖 CÓMO JUGAR</h2>
+            <p style="font-size:13px; color:#aaa; text-align:center; margin-bottom:20px;">Mentiras, engaño y salseo. Así funciona Rumor Toxic.</p>
+            
+            <div class="tutorial-step">
+                <h4>🎯 1. El Elegido (La Víctima)</h4>
+                <p>En cada ronda, el juego elige a un jugador al azar. Si <b>NO</b> eres tú, debes inventar un rumor falso y gracioso sobre esa persona basándote en el Reto en pantalla.</p>
+            </div>
+            <div class="tutorial-step" style="border-left-color:var(--accent-gold);">
+                <h4>🔥 2. Los Retos Picantes</h4>
+                <p>El juego te propondrá un <b>Reto</b> (Ej: "Inventa un secreto sobre su ex"). Al escribir tu rumor, marca la casilla <b>"Acepto el Reto"</b>. Si la víctima te elige, ¡ganarás <b>+10 Puntos Extra</b>!</p>
+            </div>
+            <div class="tutorial-step" style="border-left-color:#ff4757;">
+                <h4>😈 3. El Abogado del Diablo</h4>
+                <p>Un jugador recibirá el rol oculto de <b>Abogado del Diablo</b>. Su objetivo es engañar y escribir algo <b>MUY BUENO</b> o heroico sobre la víctima.<br>⚠️ <b>LA TRAMPA:</b> Si la Víctima elige este rumor, <b>¡ambos pierden 40 pts!</b> Si elige cualquier otro, <b>¡ambos ganan 40 pts!</b></p>
+            </div>
+            <div class="tutorial-step" style="border-left-color:var(--accent-toxic);">
+                <h4>🗳️ 4. Votación y Power-Ups</h4>
+                <p>Nadie sabe quién escribió qué. La Víctima leerá todo y elegirá al mejor. Antes de enviar tu texto, puedes comprar ventajas: <br>🛡️ <b>Escudo:</b> Oculta tu nombre a los VIP.<br>⚔️ <b>Doble Filo:</b> Apuesta. Si te eligen, ganas el doble de puntos; si no, los pierdes.</p>
+            </div>
+            <div class="tutorial-step" style="border-left-color:#00d2d3;">
+                <h4>🏆 5. Victoria</h4>
+                <p>Gana el primero en llegar a la meta: <b>Amigos (200 pts)</b>, <b>Personales (300 pts)</b> o <b>Secretos (400 pts)</b>. ¡El ganador se lleva 300 Coins para gastar en la tienda!</p>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px; justify-content:center; margin-top:20px; margin-bottom:15px;">
+                <input type="checkbox" id="no-show-tutorial" style="width:20px; height:20px; margin:0; accent-color: var(--primary); cursor:pointer;">
+                <label for="no-show-tutorial" style="font-size:13px; color:#aaa; cursor:pointer;">Entendido, no volver a mostrar al inicio</label>
+            </div>
+            
+            <button class="btn btn-p" style="font-size:16px; padding:15px;" onclick="playClick(); cerrarTutorial()">¡Entendido, a jugar! 🔥</button>
+        </div>
+    </div>
+
+    <div id="pantalla-auth">
+        <div class="auth-box">
+            <h1 style="margin:0 0 10px;">TOXIC <span style="color:var(--primary)">PLATFORM</span></h1>
+            
+            <div id="form-login">
+                <input id="logUser" type="text" placeholder="Usuario">
+                <div class="pwd-container">
+                    <input id="logPass" type="password" placeholder="Contraseña">
+                    <i class="fas fa-eye pwd-toggle" onclick="togglePwd('logPass', this)"></i>
+                </div>
+                <button onclick="playClick(); login()" class="btn btn-p">ENTRAR</button>
+                <button onclick="playClick(); toggleAuth()" class="btn btn-s" style="margin-top:10px;">Crear Cuenta Manual</button>
+                
+                <div style="margin:20px 0; border-top:1px solid rgba(255,255,255,0.1); position:relative;">
+                    <span style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--bg-panel); padding:0 10px; font-size:12px; color:#aaa;">O Entra Rápido</span>
+                </div>
+
+                <div id="g_id_onload"
+                     data-client_id="398147135006-ebn1vbecll75s57m6hibt0oqdu5ii5ns.apps.googleusercontent.com"
+                     data-context="signin"
+                     data-ux_mode="popup"
+                     data-callback="handleGoogleResponse"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin google-btn-wrap"
+                     data-type="standard"
+                     data-shape="pill"
+                     data-theme="filled_black"
+                     data-text="continue_with"
+                     data-size="large"
+                     data-logo_alignment="left">
+                </div>
+
+                <div style="margin-top:20px; font-size:12px; color:var(--text-sec); cursor:pointer; text-decoration:underline;" onclick="playClick(); document.getElementById('modal-support').style.display='flex'">¿Problemas? Contactar Soporte Técnico</div>
+            </div>
+            
+            <div id="form-reg" style="display:none;">
+                <input id="regEmail" type="email" placeholder="Correo">
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <input id="regUser" type="text" placeholder="Usuario" style="margin-bottom:0;">
+                    <button class="btn btn-s" style="width:60px; padding:0; font-size:24px;" onclick="lanzarDadoNombre()" title="Generar Nombre Aleatorio">🎲</button>
+                </div>
+                <div class="pwd-container">
+                    <input id="regPass" type="password" placeholder="Contraseña">
+                    <i class="fas fa-eye pwd-toggle" onclick="togglePwd('regPass', this)"></i>
+                </div>
+                <button onclick="playClick(); registro()" class="btn btn-p">REGISTRARSE</button>
+                <button onclick="playClick(); toggleAuth()" class="btn btn-s" style="margin-top:10px;">Volver</button>
+                <div style="margin-top:20px; font-size:12px; color:var(--text-sec); cursor:pointer; text-decoration:underline;" onclick="playClick(); document.getElementById('modal-support').style.display='flex'">¿Problemas? Contactar Soporte Técnico</div>
+            </div>
+            <p id="error-msg" style="color:#ff7675; margin-top:15px; font-size:12px;"></p>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div style="font-size:22px; font-weight:800; margin-bottom:40px;">TOXIC <span style="color:var(--primary)">PLATFORM</span></div>
+        <div class="nav-item active" onclick="playClick(); nav('view-home', this)"><i class="fas fa-gamepad"></i> Juegos</div>
+        <div class="nav-item" onclick="playClick(); nav('view-pass', this)"><i class="fas fa-star" style="color:var(--accent-gold);"></i> Pase Tóxico</div>
+        <div class="nav-item" onclick="playClick(); nav('view-social', this)"><i class="fas fa-users"></i> Social</div>
+        <div class="nav-item" onclick="playClick(); nav('view-store', this)"><i class="fas fa-shopping-bag"></i> Tienda</div>
+        <div class="nav-item" onclick="playClick(); nav('view-profile', this)"><i class="fas fa-user"></i> Perfil</div>
+        <div class="nav-item" onclick="playClick(); document.getElementById('modal-support').style.display='flex'"><i class="fas fa-headset"></i> Soporte</div>
+        <div class="nav-item" id="nav-admin" style="display:none; color:var(--accent-toxic);" onclick="playClick(); nav('view-admin', this)"><i class="fas fa-shield-alt"></i> Panel Admin</div>
+        <div class="nav-item" onclick="playClick(); document.getElementById('modal-share-app').style.display='flex'"><i class="fas fa-share-alt"></i> Invitar Amigos</div>
+        <div class="nav-item" style="margin-top:auto; color:#ff7675;" onclick="playClick(); logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</div>
+    </div>
+
+    <div id="main-content">
+        <div id="game-reaction-layer"></div> 
+        
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <div style="font-weight:bold; color:var(--primary);" id="header-user">Player</div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-s" style="width:auto; padding:8px 12px;" onclick="playClick(); document.getElementById('modal-settings').style.display='flex'"><i class="fas fa-cog"></i></button>
+                <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="playClick(); document.getElementById('modal-recharge').style.display='flex'">
+                    <div style="display:flex; align-items:center; gap:5px; color:#FFD700; font-weight:bold; background:rgba(255,215,0,0.1); padding:5px 10px; border-radius:12px;"><i class="fas fa-coins"></i> <span id="bal-coins">0</span></div>
+                    <div style="display:flex; align-items:center; gap:5px; color:#00d2d3; font-weight:bold; background:rgba(0,210,211,0.1); padding:5px 10px; border-radius:12px;"><i class="fas fa-gem"></i> <span id="bal-toxic">0</span></div>
+                    <div style="background:var(--primary); width:28px; height:28px; border-radius:50%; display:flex; justify-content:center; align-items:center; color:#fff; box-shadow:0 0 10px rgba(255,126,95,0.4); transition: transform 0.2s;"><i class="fas fa-plus" style="font-size: 14px;"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-home" class="section active">
+            <h2 style="margin-bottom:20px;">Biblioteca</h2>
+            <div class="library-container">
+                <div class="card">
+                    <div class="game-cover lib-rumor" onclick="playClick(); intentarJugar('rumor')" style="cursor:pointer;">🤫</div>
+                    <h3 onclick="playClick(); intentarJugar('rumor')" style="cursor:pointer;">Rumor Toxic</h3>
+                    <p style="font-size:12px; color:var(--text-sec); flex:1;" onclick="playClick(); intentarJugar('rumor')" style="cursor:pointer;">Mentiras, traiciones y salseo.</p>
+                    <div style="display:flex; gap:5px; margin-top:15px;">
+                        <button class="btn btn-p" style="flex:4;" onclick="playClick(); intentarJugar('rumor')">Jugar</button>
+                        <button class="btn btn-s" style="flex:1; padding:14px 0;" onclick="playClick(); abrirTutorialManual()" title="Ver Reglas del Juego">📖</button>
+                    </div>
+                </div>
+                
+                <div class="card" style="opacity:0.7; cursor:default;">
+                    <div class="game-cover lib-secret">🔥</div>
+                    <h3>Exotic</h3>
+                    <p style="font-size:12px; color:var(--text-sec); flex:1;">Juego de cartas picantes.</p>
+                    <span style="font-size:10px; background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:10px; display:inline-block; margin-top:15px;">PRÓXIMAMENTE</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="view-pass" class="section">
+            <div style="text-align:center; margin-bottom: 20px;">
+                <h2 style="color:var(--accent-gold); font-size:32px; text-shadow: 0 0 15px var(--accent-gold); margin:0;">🌟 PASE TÓXICO</h2>
+                <p style="color:var(--text-sec); font-size:13px; margin-top:5px;">Completa misiones y desbloquea recompensas legendarias.</p>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.6); border: 2px solid var(--accent-gold); border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); margin-bottom: 30px;">
+                <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px; margin-bottom:10px;">
+                    <span style="color:white; text-shadow: 0 0 5px white;">Nivel de Toxicidad</span>
+                    <span id="pass-xp-text" style="color:var(--accent-toxic); text-shadow: 0 0 8px var(--accent-toxic);">0 / 300 XP</span>
+                </div>
+                <div style="width:100%; height:20px; background:#111; border-radius:10px; overflow:hidden; border: 1px solid rgba(255,255,255,0.2); box-shadow: inset 0 0 10px black;">
+                    <div id="pass-xp-fill" style="height:100%; width:0%; background: linear-gradient(90deg, #ff7e5f, #00d2d3); box-shadow: 0 0 15px #00d2d3; transition: width 0.8s ease-out;"></div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: rgba(35,35,42,0.8); border: 1px solid var(--border); border-radius: 20px; padding: 20px;">
+                    <h3 style="color:white; text-align:center; margin-top:0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Misiones Activas</h3>
+                    <div id="missions-container" style="display:flex; flex-direction:column; gap:15px; margin-top:15px;">
+                        <div style="text-align:center; padding:20px; color:#aaa;"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--accent-toxic); margin-bottom:10px;"></i><br>Cargando Misiones...</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(35,35,42,0.8); border: 1px solid var(--border); border-radius: 20px; padding: 20px;">
+                    <h3 style="color:white; text-align:center; margin-top:0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Recompensas Exclusivas</h3>
+                    <div style="display:flex; justify-content:space-around; margin-top:20px; gap: 15px;">
+                        
+                        <div id="reward-100" class="reward-box locked">
+                            <div class="reward-circle" style="border: 3px solid #FFD700; box-shadow: 0 0 15px #FFD700;">
+                                <div style="font-size:35px;">🌟</div>
+                                <div class="lock-overlay"><i class="fas fa-lock"></i></div>
+                            </div>
+                            <h4>Marco Legendario</h4>
+                            <p>100 XP</p>
+                        </div>
+
+                        <div id="reward-300" class="reward-box locked">
+                            <div class="reward-circle" style="border: 3px solid #a55eea; box-shadow: 0 0 15px #a55eea;">
+                                <div style="font-size:35px; color:#fff;">💬</div>
+                                <div class="lock-overlay"><i class="fas fa-lock"></i></div>
+                            </div>
+                            <h4>Título "Dios Tóxico"</h4>
+                            <p>300 XP</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-social" class="section"><div class="social-tabs"><button class="tab-btn active" onclick="playClick(); verTabSocial('amigos', this)">Amigos</button><button class="tab-btn" onclick="playClick(); verTabSocial('solicitudes', this)">Solicitudes</button><button class="tab-btn" onclick="playClick(); verTabSocial('buscar', this)">Buscar</button></div><div id="tab-amigos" class="social-content"><div id="friends-list"></div></div><div id="tab-solicitudes" class="social-content" style="display:none;"><div id="req-list"></div></div><div id="tab-buscar" class="social-content" style="display:none;"><div style="display:flex; gap:10px; margin-bottom:20px;"><input id="search-friend-input" type="text" placeholder="Usuario..." style="margin:0;"><button class="btn btn-p" style="width:auto;" onclick="playClick(); socket.emit('buscarPersona', document.getElementById('search-friend-input').value)">🔍</button></div><div id="search-results-social"></div></div></div>
+        
+        <div id="view-rooms" class="section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <button class="btn btn-s" style="width:auto;" onclick="playClick(); nav('view-home')"><i class="fas fa-arrow-left"></i></button>
+                <h3 id="room-list-title" style="color:var(--accent-toxic); margin:0;">Salas</h3>
+                <button class="btn btn-p" style="width:auto;" onclick="playClick(); document.getElementById('modal-create').style.display='flex'">+ Crear</button>
+            </div>
+            <div id="rooms-list" class="room-grid"></div>
+        </div>
+        
+        <div id="view-store" class="section"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h2>Tienda</h2><button class="btn btn-p" style="width:auto;" onclick="playClick(); document.getElementById('modal-recharge').style.display='flex'">Recargar Saldo</button></div><div id="store-list" class="store-grid"></div></div>
+        <div id="view-profile" class="section"><div style="text-align:center; padding:30px; background:var(--bg-card); border-radius:20px;"><div id="p-avatar" style="font-size:60px; margin-bottom:10px;">👤</div><h2 id="p-name">User</h2><button class="btn btn-s" style="width:auto; margin-top:10px;" onclick="playClick(); abrirEditor()">Editar Perfil</button></div><h3 style="margin-top:30px;">Historial</h3><div id="history-box" style="margin-top:15px;"></div></div>
+
+        <div id="view-admin" class="section">
+            <h2 style="color:var(--accent-toxic); border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:20px;">🛡️ Panel de Control Administrador</h2>
+            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid var(--accent-toxic);">
+                <h3 style="margin-top:0; color:var(--accent-gold);"><i class="fas fa-user-edit"></i> Gestión de Usuarios y VIP</h3>
+                <input type="text" id="admin-target-user" placeholder="Nombre exacto del usuario" style="margin-bottom:15px; border-color:var(--accent-toxic);">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;"><input type="checkbox" id="admin-set-vip" style="width:auto; margin:0; transform: scale(1.5);"><label for="admin-set-vip" style="font-weight:bold; color:white;">Activar Pase VIP 👑</label></div>
+                <div style="display:flex; gap:10px; margin-bottom:15px;"><div style="flex:1;"><span class="chat-label" style="color:#FFD700;">Añadir Coins</span><input type="number" id="admin-add-coins" placeholder="Ej: 500" value="0"></div><div style="flex:1;"><span class="chat-label">Añadir Toxic</span><input type="number" id="admin-add-toxic" placeholder="Ej: 50" value="0"></div></div>
+                <button class="btn btn-p" style="background:linear-gradient(135deg, var(--accent-toxic), var(--primary));" onclick="enviarActualizacionAdmin()">Actualizar Cuenta de Usuario</button>
+            </div>
+            <h3 style="border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:20px;">Tickets de Soporte</h3>
+            <button class="btn btn-s" style="margin-bottom:15px; width:auto;" onclick="playClick(); socket.emit('obtenerTicketsAdmin')">🔄 Actualizar Tickets</button>
+            <div id="admin-tickets-list"><p style="color:#666">Cargando...</p></div>
+        </div>
+
+        <div id="view-lobby" class="section">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <button class="btn btn-s" style="width:auto;" onclick="playClick(); socket.emit('salirSala'); nav('view-rooms');">Salir</button>
+                <div style="text-align:right;"><div id="room-code-display" style="font-weight:bold; font-size:18px;">SALA</div><div id="mode-badge-lobby" class="mode-badge"></div></div>
+            </div>
+            <div style="text-align:center; margin-top:10px;"><div id="lobby-mode-panel" class="lobby-mode-panel"><div class="lmp-label">MODALIDAD</div><div id="lobby-mode-text" class="lmp-value">Cargando...</div></div></div>
+            <div style="text-align:center; margin-bottom: 10px; color:#aaa; font-size:12px;" id="spectator-count-display">👁️ 0 Espectadores</div>
+
+            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+                <button class="btn btn-s" style="width: auto; border: 1px dashed var(--text-sec);" onclick="playClick(); abrirInvitaciones()">Invitar Amigo ➕</button>
+                <button class="btn btn-s" style="width: auto; background: rgba(37, 211, 102, 0.1); color: #25D366; border: 1px solid #25D366;" onclick="playClick(); document.getElementById('modal-share-room').style.display='flex'">Compartir Sala 📲</button>
+            </div>
+
+            <div id="lobby-players" class="lobby-players"></div>
+            <div style="text-align:center;"><button id="btn-start" class="btn btn-p" style="display:none; max-width:250px; margin:0 auto;" onclick="playClick(); socket.emit('iniciarJuego')">INICIAR PARTIDA</button><p id="msg-wait" style="color:#666;">Esperando...</p>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:30px;"><button class="btn btn-s" style="width:50px;height:50px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','🔥')">🔥</button><button class="btn btn-s" style="width:50px;height:50px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','😂')">😂</button><button class="btn btn-s" style="width:50px;height:50px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','👋')">👋</button></div></div>
+        </div>
+
+        <div id="view-game" class="section" style="text-align:center;">
+            <div style="max-width:600px; margin:0 auto;">
+                <div class="game-header-bar"><span style="font-size:12px;">META: <span id="meta-display">200</span> PTS</span><span id="my-game-score" class="score-pill">0 Pts</span></div>
+                <div class="progress-bar-bg"><div id="my-progress-fill" class="progress-fill"></div></div>
+                <div style="margin-bottom:30px;"></div>
+                
+                <div style="background:var(--bg-card); padding:30px; border-radius:20px; z-index:10; position:relative;">
+                    <h2 id="role-title" style="color:var(--primary)">Rol</h2>
+
+                    <div id="rumors-progress-container" style="display:none; margin-bottom: 20px;">
+                        <div style="font-size:12px; color:var(--text-sec); margin-bottom:5px; text-transform:uppercase; letter-spacing:1px; font-weight:bold;" id="rumors-progress-text">0 rumores recibidos...</div>
+                        <div class="timer-bar" style="background:rgba(255,255,255,0.1);"><div id="rumors-progress-fill" class="timer-fill" style="width:0%; background:linear-gradient(90deg, #00d2d3, #ff7e5f); transition: width 0.3s;"></div></div>
+                    </div>
+                    
+                    <div id="input-area">
+                        <input id="rumor-text" type="text" placeholder="Escribe un rumor..." style="margin-bottom:5px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><button class="btn btn-s" style="width:auto; padding:5px 15px; font-size:12px; background:rgba(255,126,95,0.1); color:var(--primary); border:1px solid var(--primary);" onclick="playClick(); usarComodin()">🐔 Usar Comodín</button></div>
+                        <div id="rumor-suggestions" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:15px; justify-content:center;"></div>
+                        
+                        <div class="powerup-box">
+                            <label class="pu-check" style="color:var(--accent-gold); border:1px dashed var(--accent-gold); padding:8px; border-radius:8px;">
+                                <input type="checkbox" id="pu-reto"> 🔥 <strong>Acepto el Reto</strong> (+10 Pts extra si ganas)
+                            </label>
+                            <label class="pu-check"><input type="checkbox" id="pu-escudo"> 🛡️ <strong>Escudo Anti-VIP</strong> (Oculta tu nombre) <span style="color:#FFD700">-50 Coins</span></label>
+                            <label class="pu-check"><input type="checkbox" id="pu-doble"> ⚔️ <strong>Doble Filo</strong> (¡Si ganas te llevas +40pts!) <span style="color:#00d2d3">-10 Toxic</span></label>
+                        </div>
+
+                        <br><button class="btn btn-p" id="btn-enviar-rumor" onclick="playClick(); enviarMiRumor()">ENVIAR RUMOR</button>
+                    </div>
+
+                    <div id="vote-area" style="margin-top:20px; display:none;"><div class="timer-container"><div class="timer-bar"><div id="vote-timer-fill" class="timer-fill"></div></div><div id="timer-text" class="timer-text">30s</div></div><div id="vote-cards-container"></div></div>
+                    
+                    <div id="vote-wait-msg" style="display:none; margin-top:20px;">
+                        <p id="wait-text-msg" style="color:#888; font-style:italic;">Esperando a los demás...</p>
+                        <div class="reaction-bar"><button class="btn btn-s" style="width:40px;height:40px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','👀')">👀</button><button class="btn btn-s" style="width:40px;height:40px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','😱')">😱</button><button class="btn btn-s" style="width:40px;height:40px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','🤣')">🤣</button><button class="btn btn-s" style="width:40px;height:40px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','💀')">💀</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-round-res" class="section" style="text-align:center;"><h2 style="color:var(--accent-gold)">GANADOR DE RONDA</h2><div id="round-content" style="background:var(--bg-card); padding:30px; border-radius:15px; margin:20px auto; max-width:500px; position:relative; z-index:10;"></div><p style="color:#aaa;">Siguiente ronda en 5 segundos...</p></div>
+        
+        <div id="view-results" class="section" style="text-align:center;">
+            <h1 style="font-size:40px; color:var(--accent-toxic)">👑 VICTORIA 👑</h1>
+            <div id="result-content" style="background:var(--bg-card); padding:30px; border-radius:15px; margin:20px auto; max-width:500px; position:relative; z-index:10;"></div>
+            <button class="btn btn-p" style="position:relative; z-index:10; margin-top:20px; background:linear-gradient(135deg, #a55eea, #4bcffa);" onclick="playClick(); document.getElementById('modal-share-result').style.display='flex'">📸 Compartir Resultados</button>
+            
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:15px; position:relative; z-index:10; max-width:500px; margin-left:auto; margin-right:auto;">
+                <button class="btn btn-p" style="flex:1;" onclick="playClick(); nav('view-lobby')">Volver a la Sala</button>
+                <button class="btn btn-s" style="flex:1; border: 1px solid var(--border);" onclick="playClick(); socket.emit('salirSala'); nav('view-rooms')">Salir al Menú</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-bar">
+        <div class="mb-item active" onclick="playClick(); nav('view-home', this)"><i class="fas fa-gamepad"></i> Juegos</div>
+        <div class="mb-item" onclick="playClick(); nav('view-pass', this)"><i class="fas fa-star" style="color:var(--accent-gold);"></i> Pase</div>
+        <div class="mb-item" onclick="playClick(); nav('view-social', this)"><i class="fas fa-users"></i> Social</div>
+        <div class="mb-item" onclick="playClick(); nav('view-store', this)"><i class="fas fa-shopping-bag"></i> Tienda</div>
+        <div class="mb-item" onclick="playClick(); nav('view-profile', this)"><i class="fas fa-user"></i> Perfil</div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // ¡CONEXIÓN AL SERVIDOR EN RENDER PARA EL APK!
+        const socket = io("https://tu-proyecto-de-render.onrender.com");
+        
+        let itemsPoseidos = []; let miNombre = ""; let soyVip = false; let timerInterval = null; let selectedMeta = 200; let currentMeta = 200; let misAmigos = []; let invitacionesPendientes = {};
+        let miRolEnSala = 'jugador'; let salaGlobalNombre = ''; let salaGlobalPass = ''; let mejorRumorGlobal = ''; let catalogoGlobal = [];
+        let salaPendiente = null; let salaPendienteRol = 'jugador';
+        let soyLaVictimaActiva = false;
+        
+        let juegoActualGlobal = 'rumor';
+
+        window.addEventListener('load', () => { 
+            setTimeout(() => { 
+                const screen = document.getElementById('loading-screen'); 
+                if(screen) { screen.style.opacity = '0'; setTimeout(() => { screen.style.display = 'none'; }, 800); } 
+            }, 2500); 
+        });
+
+        socket.on('connect', () => {
+            const savedUser = localStorage.getItem('rx_user');
+            const savedPass = localStorage.getItem('rx_pass');
+            if (savedUser && savedPass) {
+                if (savedPass === 'login_google_sso') { socket.emit('reconectarGoogle', savedUser); } 
+                else { socket.emit('login', { usuario: savedUser, pass: savedPass }); }
+            }
+        });
+
+        function intentarJugar() { 
+            const docTitle = document.getElementById('room-list-title');
+            if(docTitle) docTitle.innerText = '🤫 Salas Rumor';
+            
+            const skip = localStorage.getItem('skipTutorial_v18'); 
+            if (skip === 'true') { nav('view-rooms'); } 
+            else { document.getElementById('modal-tutorial').style.display = 'flex'; } 
+        }
+        
+        function cerrarTutorial() { 
+            const chk = document.getElementById('no-show-tutorial');
+            if (chk && chk.checked) { localStorage.setItem('skipTutorial_v18', 'true'); } 
+            document.getElementById('modal-tutorial').style.display = 'none'; 
+            nav('view-rooms'); 
+        }
+        function abrirTutorialManual() { document.getElementById('modal-tutorial').style.display = 'flex'; }
+
+        function lanzarDadoNombre() {
+            playPop();
+            const prefijos = ["Toxic", "Dark", "Ghost", "Ninja", "Epic", "Crazy", "Savage", "Neon", "Cyber", "Venom", "Shadow"];
+            const sufijos = ["Pro", "God", "Rex", "Boy", "Girl", "Fire", "King", "Zero", "Max", "Viper", "Boss"];
+            document.getElementById('regUser').value = prefijos[Math.floor(Math.random()*prefijos.length)] + sufijos[Math.floor(Math.random()*sufijos.length)] + Math.floor(Math.random()*999);
+        }
+
+        let tempGoogleData = null;
+        function lanzarDadoGoogle() {
+            playPop();
+            const prefijos = ["Toxic", "Dark", "Ghost", "Ninja", "Epic", "Crazy", "Savage", "Neon", "Cyber", "Venom", "Shadow"];
+            const sufijos = ["Pro", "God", "Rex", "Boy", "Girl", "Fire", "King", "Zero", "Max", "Viper", "Boss"];
+            document.getElementById('google-new-user').value = prefijos[Math.floor(Math.random()*prefijos.length)] + sufijos[Math.floor(Math.random()*sufijos.length)] + Math.floor(Math.random()*999);
+        }
+
+        socket.on('pedirNombreGoogle', (data) => {
+            tempGoogleData = data;
+            document.getElementById('error-google-name').style.display = 'none';
+            document.getElementById('google-new-user').value = '';
+            document.getElementById('modal-google-username').style.display = 'flex';
+        });
+
+        socket.on('errorNombreGoogle', (msg) => {
+            const errEl = document.getElementById('error-google-name');
+            errEl.innerText = msg; errEl.style.display = 'block';
+        });
+
+        function confirmarNombreGoogle() {
+            const u = document.getElementById('google-new-user').value.trim();
+            if (!u) { const errEl = document.getElementById('error-google-name'); errEl.innerText = "⚠️ Escribe un nombre."; errEl.style.display = 'block'; return; }
+            socket.emit('completarRegistroGoogle', { usuario: u, email: tempGoogleData.email, foto: tempGoogleData.foto });
+        }
+
+        function handleGoogleResponse(response) {
+            try {
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                socket.emit('loginGoogle', { email: payload.email, nombre: payload.given_name || payload.name, foto: payload.picture });
+            } catch (e) { document.getElementById('error-msg').innerText = "Error procesando el inicio con Google."; }
+        }
+
+        function usarComodin() { 
+            const COMODINES_GENERAR = ["No sabe cuánto es 2+2", "Es alienígena disfrazado", "Se saca los mocos cuando nadie mira", "Llora escuchando reguetón", "Le debe dinero a medio mundo", "Tiene peores gustos que mi abuela"];
+            const txt = document.getElementById('rumor-text'); txt.value = COMODINES_GENERAR[Math.floor(Math.random() * COMODINES_GENERAR.length)]; 
+            socket.emit('misionComodin'); 
+        }
+
+        function speakFriendly(texto) { 
+            if ('speechSynthesis' in window) { 
+                const utterance = new SpeechSynthesisUtterance(texto); 
+                utterance.lang = 'es-ES'; utterance.pitch = 1.1; utterance.rate = 1.05; 
+                window.speechSynthesis.speak(utterance); 
+            } 
+        }
+        
+        function togglePwd(id, icon) { const el = document.getElementById(id); if(el.type === "password") { el.type = "text"; icon.classList.remove("fa-eye"); icon.classList.add("fa-eye-slash"); } else { el.type = "password"; icon.classList.remove("fa-eye-slash"); icon.classList.add("fa-eye"); } }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const bgMusic = document.getElementById('bg-music'); let isMusicPlaying = false; let musicVolume = 0.5; let sfxVolume = 0.5; bgMusic.volume = musicVolume;
+        function setMusicVol(val) { musicVolume = val / 100; bgMusic.volume = musicVolume; document.getElementById('lbl-music').innerText = val + "%"; }
+        function setSfxVol(val) { sfxVolume = val / 100; document.getElementById('lbl-sfx').innerText = val + "%"; }
+        function unlockAudio() { if (audioCtx.state === 'suspended') audioCtx.resume(); if (!isMusicPlaying) { bgMusic.play().catch(e => {}); isMusicPlaying = true; } }
+        document.body.addEventListener('click', unlockAudio, { once: true }); document.body.addEventListener('touchstart', unlockAudio, { once: true });
+        
+        function triggerVibration(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
+
+        let tensionInterval = null;
+        function updateMusicState(viewId) { 
+            if (viewId === 'view-game') bgMusic.pause(); 
+            else { 
+                if (isMusicPlaying) bgMusic.play().catch(e=>{}); 
+                const tbg = document.getElementById('tension-bg');
+                if(tbg) { tbg.style.opacity = 0; tbg.classList.remove('tension-pulse'); }
+                if(tensionInterval) { clearInterval(tensionInterval); tensionInterval = null; }
+            } 
+        }
+
+        function playClick() { triggerVibration(15); if (audioCtx.state === 'suspended') return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.1 * sfxVolume, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
+        function playNotify() { triggerVibration([30, 50, 30]); if (audioCtx.state === 'suspended') return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'sine'; osc.frequency.setValueAtTime(500, audioCtx.currentTime); osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.1 * sfxVolume, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
+        function playSuccess() { triggerVibration(50); if (audioCtx.state === 'suspended') return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'square'; osc.frequency.setValueAtTime(600, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.05 * sfxVolume, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2); osc.start(); osc.stop(audioCtx.currentTime + 0.2); }
+        function playPop() { triggerVibration(25); if (audioCtx.state === 'suspended') return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.setValueAtTime(300, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.1 * sfxVolume, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
+        function playVipSound() { if (audioCtx.state === 'suspended') return; const now = audioCtx.currentTime; [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'square'; osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = freq; gain.gain.setValueAtTime(0, now + i * 0.12); gain.gain.linearRampToValueAtTime(0.08 * sfxVolume, now + i * 0.12 + 0.05); gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.4); osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.4); }); }
+
+        function playThunder() { if (audioCtx.state === 'suspended') return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sawtooth'; osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 1); gain.gain.setValueAtTime(1 * sfxVolume, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1); osc.start(); osc.stop(audioCtx.currentTime + 1); triggerVibration([100, 50, 100, 50, 200]); }
+        function playExplosion() { if (audioCtx.state === 'suspended') return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'square'; osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.setValueAtTime(50, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1, audioCtx.currentTime + 0.8); gain.gain.setValueAtTime(1 * sfxVolume, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8); osc.start(); osc.stop(audioCtx.currentTime + 0.8); triggerVibration([300]); }
+
+        function enviarAppNativo() { 
+            const link = "https://tu-proyecto-de-render.onrender.com"; 
+            const texto = `¡Descubrí este juego buenísimo para jugar con amigos! Se llama *Toxic Platform* ☣️.\nMentiras, traiciones y salseo. Juega gratis aquí:`; 
+            if (navigator.share) { navigator.share({ title: 'Toxic Platform', text: texto, url: link }).catch(e=>{}); } 
+            else { window.open(`https://wa.me/?text=${encodeURIComponent(texto + "\n" + link)}`, '_blank'); } 
+        }
+        function enviarLobbyNativo() { 
+            const link = "https://tu-proyecto-de-render.onrender.com"; 
+            const texto = `¡Únete a mi sala y demuestra qué tan tóxico eres! ☣️\n🔥 Sala: *${salaGlobalNombre}*\n🔑 Clave: *${salaGlobalPass || 'Ninguna'}*\nJuega gratis aquí:`; 
+            if (navigator.share) { navigator.share({ title: 'Sala Toxic Platform', text: texto, url: link }).catch(e=>{}); } 
+            else { window.open(`https://wa.me/?text=${encodeURIComponent(texto + "\n" + link)}`, '_blank'); } 
+        }
+        function enviarSalseoNativo() { 
+            const link = "https://tu-proyecto-de-render.onrender.com"; 
+            const texto = `¡Gané en Rumor Toxic! 🏆\nEl mejor rumor de la partida fue:\n"${mejorRumorGlobal}"\n¿Crees que eres más tóxico que yo? ¡Entra a jugar!\n`; 
+            if (navigator.share) { navigator.share({ title: 'Victoria en Rumor Toxic', text: texto, url: link }).catch(e=>{}); } 
+            else { window.open(`https://wa.me/?text=${encodeURIComponent(texto + "\n" + link)}`, '_blank'); } 
+        }
+
+        function descargarTarjeta(idTarjeta) { playClick(); socket.emit('notificacion', '📸 Generando imagen...'); const card = document.getElementById(idTarjeta); html2canvas(card, { backgroundColor: '#0f0f13', scale: 2, useCORS: true }).then(canvas => { const imgData = canvas.toDataURL('image/png'); const visor = document.createElement('div'); visor.style.position = 'fixed'; visor.style.top = '0'; visor.style.left = '0'; visor.style.width = '100%'; visor.style.height = '100%'; visor.style.backgroundColor = 'rgba(0,0,0,0.95)'; visor.style.zIndex = '9999'; visor.style.display = 'flex'; visor.style.flexDirection = 'column'; visor.style.alignItems = 'center'; visor.style.justifyContent = 'center'; visor.innerHTML = `<h3 style="color:var(--primary); margin-bottom:10px; text-align:center;">Mantén presionada la imagen<br>para Guardar 👇</h3><img src="${imgData}" style="max-width:90%; max-height:70vh; border-radius:15px; box-shadow:0 10px 30px rgba(255,126,95,0.5);"><button class="btn btn-p" style="margin-top:20px; width:200px;" onclick="this.parentElement.remove(); playClick();">Cerrar Visor</button>`; document.body.appendChild(visor); }).catch(err => { socket.emit('notificacion', '❌ Error al generar imagen.'); }); }
+
+        let chatAbierto = false; let msjsSinLeer = 0;
+        function toggleChat() { chatAbierto = !chatAbierto; const panel = document.getElementById('chat-flotante'); if(chatAbierto) { panel.classList.add('abierto'); msjsSinLeer = 0; actualizarBadgeChat(); const box = document.getElementById('chat-messages'); box.scrollTop = box.scrollHeight; } else { panel.classList.remove('abierto'); } }
+        function enviarChat() { const input = document.getElementById('chat-input'); const txt = input.value.trim(); if(txt) { socket.emit('enviarMensajeChat', txt); input.value = ""; } }
+        function actualizarBadgeChat() { const badge = document.getElementById('chat-badge'); if(msjsSinLeer > 0) { badge.innerText = msjsSinLeer; badge.style.display = 'flex'; } else { badge.style.display = 'none'; } }
+        socket.on('nuevoMensajeChat', (d) => { const box = document.getElementById('chat-messages'); const esMio = d.autor === miNombre; const colorVip = d.vip === 1 ? 'color:gold;' : 'color:var(--primary);'; const corona = d.vip === 1 ? '👑' : ''; box.innerHTML += `<div class="chat-msg ${esMio ? 'mi-msg' : 'otro-msg'}"><div style="font-size:10px; font-weight:bold; margin-bottom:3px; ${colorVip}">${corona} ${d.autor}</div><div>${d.texto}</div></div>`; box.scrollTop = box.scrollHeight; if(!chatAbierto && !esMio) { msjsSinLeer++; actualizarBadgeChat(); playPop(); } });
+
+        function toggleAuth() { const l=document.getElementById('form-login'), r=document.getElementById('form-reg'); if(l.style.display==='none'){l.style.display='block';r.style.display='none'}else{l.style.display='none';r.style.display='block'} }
+        function login() { const u = document.getElementById('logUser').value.trim(); const p = document.getElementById('logPass').value; socket.emit('login', {usuario: u, pass: p}); }
+        function registro() { const u = document.getElementById('regUser').value.trim(); const p = document.getElementById('regPass').value; socket.emit('registro', {email:document.getElementById('regEmail').value, usuario: u, pass: p}); }
+        function logout() { localStorage.removeItem('rx_user'); localStorage.removeItem('rx_pass'); location.reload(); }
+        
+        function abrirWhatsApp(tipo, cantidad, costo) { let mensaje = `Hola, mi usuario es *${miNombre}*. Quiero recargar ${cantidad} ${tipo} por $${costo} USD.`; if (tipo === 'vip') { mensaje = `Hola, mi usuario es *${miNombre}*. Quiero activar el VIP por $${costo} USD.`; } window.open(`https://wa.me/584121599459?text=${encodeURIComponent(mensaje)}`, '_blank'); }
+        function enviarActualizacionAdmin() { const usuarioTarget = document.getElementById('admin-target-user').value; if (!usuarioTarget) return alert("Escribe el nombre del usuario."); socket.emit('adminActualizarUsuario', { usuario: usuarioTarget, vip: document.getElementById('admin-set-vip').checked, coins: document.getElementById('admin-add-coins').value, toxic: document.getElementById('admin-add-toxic').value }); document.getElementById('admin-target-user').value = ""; document.getElementById('admin-set-vip').checked = false; document.getElementById('admin-add-coins').value = "0"; document.getElementById('admin-add-toxic').value = "0"; }
+        function verTabSoporte(tab, btn) { document.getElementById('tab-soporte-nuevo').style.display = tab==='nuevo'?'block':'none'; document.getElementById('tab-soporte-historial').style.display = tab==='historial'?'block':'none'; btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+        function enviarSoporte() { const email = document.getElementById('sup-email').value; const msg = document.getElementById('sup-msg').value; if(!email || !msg) return alert("Llena los campos"); socket.emit('enviarSoporte', { email, mensaje: msg }); document.getElementById('sup-msg').value = ""; alert("Ticket enviado."); }
+        function responderTicketAdmin(id) { const inputEl = document.getElementById(`reply-in-${id}`); if(!inputEl.value) return alert("Escribe algo."); socket.emit('adminResponderTicket', { id: id, respuesta: inputEl.value }); }
+        function verRespuestaSoporte() { document.getElementById('notification-bar').classList.remove('show'); document.getElementById('modal-support').style.display = 'flex'; verTabSoporte('historial', document.querySelectorAll('.social-tabs .tab-btn')[1]); socket.emit('obtenerMisTickets'); }
+
+        socket.on('errorLogin', (m)=> { document.getElementById('error-msg').innerText=m; localStorage.removeItem('rx_user'); localStorage.removeItem('rx_pass'); });
+
+        function renderPase(misionesData, xp) {
+            let misiones = misionesData;
+            if (typeof misiones === 'string') { try { misiones = JSON.parse(misiones); } catch(e) { misiones = null; } }
+            if (!misiones || !misiones.victorias) { misiones = { victorias: { count: 0, max: 3, xp: 100 }, comodines: { count: 0, max: 5, xp: 50 }, rumores: { count: 0, max: 10, xp: 150 } }; }
+
+            document.getElementById('pass-xp-text').innerText = `${xp} / 300 XP`;
+            document.getElementById('pass-xp-fill').style.width = Math.min((xp/300)*100, 100) + '%';
+            
+            let mHtml = "";
+            const dict = [
+                {k: 'victorias', titulo: '🏆 Gana Partidas', color: 'var(--accent-toxic)'},
+                {k: 'comodines', titulo: '🐔 Usa Comodines', color: '#ff7e5f'},
+                {k: 'rumores', titulo: '🔥 Haz que elijan tu rumor', color: 'var(--accent-gold)'}
+            ];
+            
+            dict.forEach(d => {
+                const m = misiones[d.k];
+                if(m) {
+                    let prog = Math.min((m.count / m.max) * 100, 100);
+                    mHtml += `<div class="mission-neon-card"><div class="m-title"><span>${d.titulo}</span> <span class="m-xp">+${m.xp} XP</span></div><div class="mission-bar-bg"><div class="mission-bar-fill" style="background:${d.color}; width:${prog}%; box-shadow: 0 0 10px ${d.color};"></div></div><div style="text-align:right; font-size:11px; color:#aaa;">Progreso: ${m.count}/${m.max}</div></div>`;
+                }
+            });
+            document.getElementById('missions-container').innerHTML = mHtml;
+
+            const hasLegend = itemsPoseidos.includes('m_legend') || xp >= 100;
+            const hasDios = itemsPoseidos.includes('tit_dios') || xp >= 300;
+            const r100 = document.getElementById('reward-100'); const r300 = document.getElementById('reward-300');
+            if(hasLegend) { r100.classList.remove('locked'); r100.classList.add('unlocked'); } else { r100.classList.add('locked'); r100.classList.remove('unlocked'); }
+            if(hasDios) { r300.classList.remove('locked'); r300.classList.add('unlocked'); } else { r300.classList.add('locked'); r300.classList.remove('unlocked'); }
+        }
+
+        socket.on('updatePase', (d) => { if(d.items) itemsPoseidos = d.items; renderPase(d.misiones, d.xp); });
+
+        socket.on('loginExitoso', (data)=>{
+            localStorage.setItem('rx_user', data.usuario);
+            if (data.pass) localStorage.setItem('rx_pass', data.pass);
+
+            document.getElementById('pantalla-auth').style.display='none';
+            document.getElementById('modal-google-username').style.display='none';
+            tempGoogleData = null;
+
+            miNombre = data.usuario; soyVip = data.vip === 1; 
+            document.getElementById('header-user').innerHTML = data.usuario + (soyVip ? ' <span style="color:gold; font-size:12px; font-weight:bold;">[VIP]</span>' : '');
+            document.getElementById('p-name').innerHTML = data.usuario + (soyVip ? ' 👑' : '');
+            document.getElementById('bal-coins').innerText = data.coins; document.getElementById('bal-toxic').innerText = data.toxic;
+            itemsPoseidos = data.items.split(','); 
+            actualizarAvatarVisual(data.avatar, data.avatar_type, data.marco);
+            
+            if(data.misionesObj) renderPase(data.misionesObj, data.xp);
+
+            const hb = document.getElementById('history-box'); if(data.historial && data.historial.length>0) { hb.innerHTML = data.historial.map(h=>`<div class="hist-item"><span>${h.fecha}</span><span class="${h.resultado.includes('VICTORIA')?'res-win':'res-loss'}">${h.resultado}</span></div>`).join(''); } else { hb.innerHTML = "<p style='color:#666'>Sin historial.</p>"; }
+            socket.emit('cargarSocial'); if(data.esAdmin) { document.getElementById('nav-admin').style.display = 'flex'; document.getElementById('mb-admin').style.display = 'flex'; socket.emit('obtenerTicketsAdmin'); } unlockAudio(); 
+        });
+
+        socket.on('saldoActualizado', (d)=>{ 
+            document.getElementById('bal-coins').innerText=d.coins; document.getElementById('bal-toxic').innerText=d.toxic; 
+            if (d.vip !== undefined) { soyVip = d.vip === 1; document.getElementById('header-user').innerHTML = miNombre + (soyVip ? ' <span style="color:gold; font-size:12px; font-weight:bold;">[VIP]</span>' : ''); document.getElementById('p-name').innerHTML = miNombre + (soyVip ? ' 👑' : ''); }
+            playSuccess(); 
+        });
+
+        socket.on('misTickets', (tickets) => { const c = document.getElementById('user-tickets-container'); if(tickets.length===0) c.innerHTML = "<p style='color:#666'>No has enviado tickets.</p>"; else c.innerHTML = tickets.map(t => `<div class="user-ticket-item ${t.respuesta ? 'answered' : ''}" style="margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;"><div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; margin-bottom:5px;"><span>${t.fecha}</span><span>${t.respuesta ? '✅ RESUELTO' : '⏳ PENDIENTE'}</span></div><div style="font-size:14px; margin-bottom:5px;">${t.mensaje}</div>${t.respuesta ? `<div class="ticket-reply-box" style="background:rgba(0,210,211,0.1); padding:10px; border-radius:8px; margin-top:5px; font-size:13px; color:var(--accent-toxic);"><strong>Soporte:</strong> ${t.respuesta}</div>` : ''}</div>`).join(''); });
+        socket.on('listaTicketsAdmin', (tickets) => { const container = document.getElementById('admin-tickets-list'); if(tickets.length === 0) container.innerHTML = "<p style='color:#666'>No hay tickets pendientes.</p>"; else container.innerHTML = tickets.map(t => `<div class="ticket-card"><div class="ticket-header"><span><i class="fas fa-user"></i> ${t.usuario || 'Anon'} (${t.email})</span><span>${t.fecha}</span></div><div class="ticket-msg">${t.mensaje}</div>${t.respuesta ? `<p style="font-size:12px; color:var(--accent-toxic);">Respuesta enviada: ${t.respuesta}</p>` : `<div><input id="reply-in-${t.id}" type="text" class="admin-reply-input" placeholder="Escribe tu respuesta..."><button class="btn-resolve" onclick="responderTicketAdmin(${t.id})">Responder y Cerrar</button></div>`}</div>`).join(''); });
+        socket.on('notificacion', (m) => { if(m.includes("Soporte ha respondido")) { playSuccess(); document.getElementById('notif-text').innerText = "¡El soporte te ha respondido!"; document.getElementById('notification-bar').classList.add('show'); setTimeout(() => { document.getElementById('notification-bar').classList.remove('show'); }, 8000); } else { playNotify(); const t = document.createElement('div'); t.className='toast'; t.innerText=m; document.getElementById('toast-box').appendChild(t); setTimeout(()=>t.remove(),3000); } });
+
+        socket.on('vipEntro', (data) => { 
+            if (data.entrada === 'e_rayos') { playThunder(); document.body.classList.add('flash-lightning'); setTimeout(() => document.body.classList.remove('flash-lightning'), 1000); } 
+            else if (data.entrada === 'e_explo') { playExplosion(); document.body.classList.add('shake-explosion'); setTimeout(() => document.body.classList.remove('shake-explosion'), 800); } 
+            else { playVipSound(); }
+            const container = document.getElementById('vip-banner-container'); const banner = document.createElement('div'); banner.className = 'vip-banner'; banner.innerHTML = `👑 Abran paso, ${data.nombre} ha llegado`; container.appendChild(banner); setTimeout(() => { banner.remove(); }, 4000); 
+        });
+
+        function actualizarAvatarVisual(av, type, marco = '') { 
+            const el = document.getElementById('p-avatar'); el.className = marco; 
+            el.style.width = '80px'; el.style.height = '80px'; el.style.margin = '0 auto 10px auto'; el.style.display = 'flex'; el.style.justifyContent = 'center'; el.style.alignItems = 'center'; el.style.borderRadius = '50%';
+            el.innerHTML = type==='url' ? `<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : av; 
+        }
+        
+        function verTabSocial(tab, btn) { document.querySelectorAll('.social-content').forEach(d => d.style.display='none'); document.getElementById('tab-'+tab).style.display='block'; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); if(btn) btn.classList.add('active'); }
+        
+        socket.on('socialData', (data) => { misAmigos = data.amigos; const fList = document.getElementById('friends-list'); fList.innerHTML = data.amigos.length ? data.amigos.map(a => `<div class="friend-row" style="display:flex; justify-content:space-between; margin-bottom:10px; padding:10px; background:rgba(255,255,255,0.05); border-radius:10px;"><div style="display:flex;align-items:center; gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:${a.online?'#00d2d3':'#555'};"></span><strong>${a.nombre}</strong></div><button class="btn btn-s" style="width:auto; padding:5px 10px; font-size:12px;" onclick="playClick(); socket.emit('eliminarAmigo','${a.nombre}')">X</button></div>`).join('') : '<p style="color:#666">No tienes amigos aún.</p>'; const rList = document.getElementById('req-list'); rList.innerHTML = data.solicitudes.length ? data.solicitudes.map(s => `<div class="friend-row" style="margin-bottom:10px; padding:10px; background:rgba(255,255,255,0.05); border-radius:10px; display:flex; justify-content:space-between; align-items:center;"><span>${s.de} te quiere añadir.</span><div style="display:flex; gap:5px;"><button class="btn btn-p" style="width:auto; padding:5px 10px;" onclick="playClick(); socket.emit('responderSolicitud',{id:${s.id},accion:'aceptar'})">✔</button><button class="btn btn-s" style="width:auto; padding:5px 10px;" onclick="playClick(); socket.emit('responderSolicitud',{id:${s.id},accion:'rechazar'})">X</button></div></div>`).join('') : '<p style="color:#666">No hay solicitudes.</p>'; });
+        socket.on('resultadoBusquedaSocial', (res) => { const div = document.getElementById('search-results-social'); div.innerHTML = res.length ? res.map(u => `<div class="friend-row" style="display:flex; justify-content:space-between; margin-bottom:10px; padding:10px; background:rgba(255,255,255,0.05); border-radius:10px;"><strong>${u.usuario}</strong><button class="btn btn-p" style="width:auto; padding:5px 10px;" onclick="playClick(); socket.emit('enviarSolicitudAmistad','${u.usuario}')">Agregar</button></div>`).join('') : '<p style="color:#666">No encontrado.</p>'; });
+        socket.on('refrescarSocial', () => { socket.emit('cargarSocial'); });
+
+        function abrirInvitaciones() { socket.emit('cargarSocial'); const listContainer = document.getElementById('invite-list'); const onlineFriends = misAmigos.filter(a => a.online); if(onlineFriends.length === 0) listContainer.innerHTML = "<p style='color:#666; text-align:center;'>No tienes amigos conectados.</p>"; else listContainer.innerHTML = onlineFriends.map(a => `<div class="friend-row" style="display:flex; justify-content:space-between; margin-bottom:10px; padding:10px; background:rgba(255,255,255,0.05); border-radius:10px;"><div style="display:flex;align-items:center; gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:#00d2d3;"></span><strong>${a.nombre}</strong></div><button class="btn btn-p" style="width:auto; padding:5px 10px; font-size:12px;" onclick="playClick(); socket.emit('invitarAmigo','${a.nombre}'); this.innerText='Enviado'; this.disabled=true;">Invitar</button></div>`).join(''); document.getElementById('modal-invite').style.display = 'flex'; }
+        socket.on('invitacionRecibida', (inv) => { playNotify(); invitacionesPendientes[inv.salaId] = inv.pass; const toast = document.createElement('div'); toast.className = 'toast-invite'; toast.id = `inv-${inv.salaId}`; toast.innerHTML = `<div class="ti-header"><i class="fas fa-envelope"></i> Invitación</div><div class="ti-body"><strong>${inv.host}</strong> te invita a la sala <strong>${inv.salaNombre}</strong>.</div><div class="ti-actions"><button class="btn btn-p" style="font-size:12px; padding:8px;" onclick="playClick(); aceptarInvitacion('${inv.salaId}')">Aceptar</button><button class="btn btn-s" style="font-size:12px; padding:8px;" onclick="playClick(); rechazarInvitacion('${inv.salaId}')">Ignorar</button></div>`; document.getElementById('toast-box').appendChild(toast); setTimeout(() => { const el = document.getElementById(`inv-${inv.salaId}`); if(el) el.remove(); delete invitacionesPendientes[inv.salaId]; }, 15000); });
+        function aceptarInvitacion(salaId) { const pass = invitacionesPendientes[salaId]; socket.emit('unirseSala', {id: salaId, clave: pass, rol: 'jugador'}); rechazarInvitacion(salaId); }
+        function rechazarInvitacion(salaId) { const el = document.getElementById(`inv-${salaId}`); if(el) el.remove(); delete invitacionesPendientes[salaId]; }
+
+        socket.on('listaSalas', (salas) => { 
+            const grid = document.getElementById('rooms-list'); grid.innerHTML = ""; 
+            if(salas.length===0) grid.innerHTML = "<p style='color:#666'>No hay salas creadas.</p>"; 
+            salas.forEach(s => { 
+                let badgeClass = "friends"; let badgeText = "👥 Amigos"; 
+                if(s.meta == 300) { badgeClass = "personal"; badgeText = "🔥 Personales"; } 
+                if(s.meta == 400) { badgeClass = "secret"; badgeText = "🕵️ Secretos"; } 
+                grid.innerHTML += `<div class="card"><h3 style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🤫 ${s.nombre} ${s.privada?'🔒':''}</h3><div class="mode-badge ${badgeClass}">${badgeText}</div><p style="font-size:12px; color:#888; margin-top:10px;">👥 ${s.jugadores}/8 | 👁️ ${s.espectadores}</p><div style="display:flex; gap:5px; margin-top:10px;"><button class="btn btn-p" style="flex:1; padding:8px; font-size:12px;" onclick="playClick(); intentarUnirse('${s.id}', ${s.privada}, 'jugador')">Jugar</button><button class="btn btn-s" style="flex:1; padding:8px; font-size:12px; border: 1px solid #555;" onclick="playClick(); intentarUnirse('${s.id}', ${s.privada}, 'espectador')">👁️ Ver</button></div></div>`; 
+            }); 
+        });
+        
+        function selectMode(points, el) { selectedMeta = points; document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected')); el.classList.add('selected'); }
+        
+        function crearSala() { 
+            let n = document.getElementById('newRoomName').value.trim(); 
+            const p = document.getElementById('newRoomPass').value.trim(); 
+            if(!n) n = `Sala de ${miNombre}`; 
+            socket.emit('crearSala', {nombre:n, clave:p, meta: selectedMeta, tipoJuego: 'rumor'}); 
+            document.getElementById('modal-create').style.display='none'; 
+            document.getElementById('newRoomName').value = '';
+            document.getElementById('newRoomPass').value = '';
+        }
+        
+        function intentarUnirse(id, esPrivada, rol = 'jugador') { 
+            salaPendienteRol = rol; salaPendiente = id;
+            if(esPrivada) { document.getElementById('roomPassInput').value = ''; document.getElementById('modal-pass').style.display='flex'; } 
+            else { socket.emit('unirseSala', {id:id, clave:null, rol: rol}); } 
+        }
+        
+        function confirmarIngreso() { socket.emit('unirseSala', {id:salaPendiente, clave:document.getElementById('roomPassInput').value, rol: salaPendienteRol}); document.getElementById('modal-pass').style.display='none'; }
+
+        socket.on('entradoEnSala', (d) => { 
+            try {
+                playSuccess(); currentMeta = d.meta; miRolEnSala = d.rol; 
+                const md = document.getElementById('meta-display'); if(md) md.innerText = currentMeta; 
+                const rcd = document.getElementById('room-code-display'); if(rcd) rcd.innerText = d.nombreSala;
+                
+                salaGlobalNombre = d.nombreSala; salaGlobalPass = d.privada ? "(Privada)" : "";
+                
+                const sn = document.getElementById('share-room-name'); if (sn) sn.innerText = salaGlobalNombre;
+                const sp = document.getElementById('share-room-pass'); if (sp) sp.innerText = d.privada ? "Clave: Requerida 🔒" : "Sala Pública 🔓";
+
+                let panelText = document.getElementById('lobby-mode-text'); 
+                if (panelText) {
+                    if(d.meta == 200) { panelText.className = "lmp-value mode-amigos"; panelText.innerHTML = "👥 AMIGOS (200 Pts)"; } 
+                    else if(d.meta == 300) { panelText.className = "lmp-value mode-personales"; panelText.innerHTML = "🔥 PERSONALES (300 Pts)"; } 
+                    else { panelText.className = "lmp-value mode-secretos"; panelText.innerHTML = "🕵️ SECRETOS (400 Pts)"; }
+                }
+
+                let badgeClass = "friends"; let badgeText = "👥 Amigos"; 
+                if(d.meta == 300) { badgeClass = "personal"; badgeText = "🔥 Personales"; } 
+                if(d.meta == 400) { badgeClass = "secret"; badgeText = "🕵️ Secretos"; }
+                
+                const badgeEl = document.getElementById('mode-badge-lobby'); 
+                if (badgeEl) { badgeEl.className = `mode-badge ${badgeClass}`; badgeEl.innerText = badgeText; }
+                
+                const btnChat = document.getElementById('btn-toggle-chat'); if (btnChat) btnChat.style.display = 'flex';
+                const chatMsgs = document.getElementById('chat-messages'); if (chatMsgs) chatMsgs.innerHTML = '<div style="text-align:center; color:#666; font-size:11px; margin-top:10px;">¡Bienvenido al chat de la sala!</div>';
+                
+                nav('view-lobby'); 
+            } catch(e) { console.error(e); nav('view-lobby'); }
+        });
+
+        socket.on('actualizarSala', (lista, numEspectadores) => { 
+            document.getElementById('spectator-count-display').innerText = `👁️ ${numEspectadores || 0} Espectadores`;
+            document.getElementById('lobby-players').innerHTML = lista.map((p, i) => { 
+                const claseVip = p.vip === 1 ? 'vip-glow' : ''; const estiloVip = p.vip === 1 ? 'color:gold; font-weight:bold;' : ''; const tituloHtml = p.titulo ? `<div style="font-size:9px; color:var(--primary); font-weight:bold; margin-top:2px; text-transform:uppercase; max-width:90px; line-height:1; word-wrap:break-word; text-align:center;">${p.titulo}</div>` : '';
+                let iconStr = p.avatarType==='url'?`<img src="${p.avatar}" style="width:100%;height:100%;border-radius:50%;">`:p.avatar;
+                if(p.id === 'desconectado') iconStr = '🔌';
+                return `<div class="player-tile ${claseVip}">${i===0?'<div class="pt-crown">👑</div>':''}<div class="pt-avatar ${p.marco}">${iconStr}</div><div style="${estiloVip}">${p.nombre}</div>${tituloHtml}</div>`; 
+            }).join(''); 
+            const esHost = lista.length>0 && lista[0].id===socket.id; document.getElementById('btn-start').style.display = esHost ? 'block' : 'none'; document.getElementById('msg-wait').style.display = esHost ? 'none' : 'block'; 
+        });
+        
+        socket.on('gameReaction', (d)=>{ playPop(); let c = document.getElementById('view-game').classList.contains('active') ? document.getElementById('game-reaction-layer') : document.getElementById('lobby-players'); const b=document.createElement('div'); b.innerText=d.emoji; b.style.position='absolute'; b.style.top='50%'; b.style.left= Math.random() * 80 + 10 + '%'; b.style.fontSize='40px'; b.style.animation='floatUp 1.5s ease-out forwards'; c.appendChild(b); setTimeout(()=>b.remove(),1500); });
+
+        socket.on('datosCatalogo', (cat) => { 
+            catalogoGlobal = cat; const c = document.getElementById('store-list'); c.innerHTML = ""; 
+            cat.forEach(i => { 
+                if(i.moneda==='gratis' || i.moneda==='pase') return; 
+                const tengo = itemsPoseidos.includes(i.id); let icon = i.icon; 
+                if(i.nombre === 'Shinobi' || i.id === 'c_ninja') { icon = '<i class="fas fa-user-ninja" style="color:#bdc3c7"></i>'; } 
+                if(i.tipo === 'titulo') { icon = '<i class="fas fa-comment-dots" style="color:var(--primary)"></i>'; } 
+                let monedaIcon = i.moneda === 'coins' ? '<i class="fas fa-coins" style="color:#FFD700"></i>' : '<i class="fas fa-gem" style="color:#00d2d3"></i>'; 
+                let classM = i.tipo === 'marco' ? i.clase : ''; 
+                c.innerHTML += `<div class="card"><div style="font-size:40px;" class="${classM}">${icon}</div><strong>${i.nombre}</strong><br><small>${monedaIcon} ${i.precio}</small><button class="btn ${tengo?'btn-s':'btn-p'}" style="margin-top:10px;" onclick="playClick(); socket.emit('comprarItem','${i.id}')" ${tengo?'disabled':''}>${tengo?'Listo':'Comprar'}</button></div>`; 
+            }); 
+        });
+        
+        function abrirEditor() { const c = document.getElementById('inventory-container'); const tc = document.getElementById('titles-container'); const fc = document.getElementById('frames-container'); const ec = document.getElementById('entries-container'); c.innerHTML = ""; tc.innerHTML = `<button class="btn btn-s" onclick="playClick(); socket.emit('cambiarTitulo', ''); document.getElementById('modal-edit-profile').style.display='none';">Quitar Título</button>`; fc.innerHTML = `<button class="btn btn-s" onclick="playClick(); socket.emit('cambiarMarco', ''); document.getElementById('modal-edit-profile').style.display='none';">Quitar Marco</button>`; ec.innerHTML = `<button class="btn btn-s" onclick="playClick(); socket.emit('cambiarEntrada', ''); document.getElementById('modal-edit-profile').style.display='none';">Ninguna</button>`; catalogoGlobal.forEach(i => { if(itemsPoseidos.includes(i.id)) { if (i.tipo === 'titulo') { tc.innerHTML += `<button class="btn btn-p" style="background:rgba(255,255,255,0.1); color:white; border:1px solid var(--primary);" onclick="playClick(); socket.emit('cambiarTitulo', '${i.nombre}'); document.getElementById('modal-edit-profile').style.display='none';">${i.nombre}</button>`; } else if (i.tipo === 'marco') { fc.innerHTML += `<button class="btn btn-p ${i.clase}" style="background:rgba(255,255,255,0.1); color:white; border-radius:50%; width:60px; height:60px; display:inline-flex; justify-content:center; align-items:center;" onclick="playClick(); socket.emit('cambiarMarco', '${i.clase}'); document.getElementById('modal-edit-profile').style.display='none';">${i.icon}</button>`; } else if (i.tipo === 'entrada') { ec.innerHTML += `<button class="btn btn-p" style="background:linear-gradient(135deg, var(--accent-toxic), var(--primary)); color:white;" onclick="playClick(); socket.emit('cambiarEntrada', '${i.id}'); document.getElementById('modal-edit-profile').style.display='none';">${i.icon} ${i.nombre}</button>`; } else { let icon = i.icon; if(i.nombre === 'Shinobi' || i.id === 'c_ninja') { icon = '<i class="fas fa-user-ninja" style="color:#bdc3c7"></i>'; } c.innerHTML += `<div style="font-size:30px; cursor:pointer; padding:10px; background:rgba(255,255,255,0.1); border-radius:10px; text-align:center;" onclick="playClick(); socket.emit('cambiarAvatar',{tipo:'emoji',valor:'${i.icon}'}); document.getElementById('modal-edit-profile').style.display='none';">${icon}</div>`; } } }); document.getElementById('modal-edit-profile').style.display='flex'; }
+        socket.on('avatarActualizado', (d)=>{ actualizarAvatarVisual(d.valor, d.tipo, document.getElementById('p-avatar').className); });
+        
+        socket.on('vueltoAlDashboard', () => { document.getElementById('btn-toggle-chat').style.display = 'none'; chatAbierto = false; document.getElementById('chat-flotante').classList.remove('abierto'); });
+
+        function nav(viewId, el) { 
+            updateMusicState(viewId); 
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
+            const target = document.getElementById(viewId);
+            if(target) target.classList.add('active'); 
+            if(el) { document.querySelectorAll('.mb-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); if(el.classList.contains('mb-item') || el.classList.contains('nav-item')) el.classList.add('active'); } 
+            
+            if(viewId==='view-rooms') socket.emit('obtenerSalas'); 
+            if(viewId==='view-social') socket.emit('cargarSocial'); 
+            if(viewId==='view-pass') socket.emit('solicitarPase'); 
+        }
+
+        socket.on('actualizarPuntajesPartida', (scores) => { 
+            const s = scores[miNombre] || 0; 
+            document.getElementById('my-game-score').innerText = s + " Pts"; 
+            document.getElementById('my-progress-fill').style.width = Math.min((s/currentMeta)*100, 100) + "%"; 
+            
+            let maxScore = 0;
+            Object.values(scores).forEach(score => { if(score > maxScore) maxScore = score; });
+            let progress = maxScore / currentMeta;
+            
+            const tensionBg = document.getElementById('tension-bg');
+            if (progress >= 0.7) { 
+                tensionBg.style.opacity = (progress - 0.6) / 0.4; 
+                tensionBg.classList.add('tension-pulse');
+                if(!tensionInterval) tensionInterval = setInterval(()=>{ triggerVibration(50); }, 1000);
+            } else {
+                tensionBg.style.opacity = 0;
+                tensionBg.classList.remove('tension-pulse');
+                if(tensionInterval) { clearInterval(tensionInterval); tensionInterval = null; }
+            }
+        });
+        
+        function enviarMiRumor() { 
+            const t = document.getElementById('rumor-text').value; 
+            const usaEscudo = document.getElementById('pu-escudo').checked; 
+            const usaDoble = document.getElementById('pu-doble').checked; 
+            const aceptaReto = document.getElementById('pu-reto').checked; 
+            
+            if(!t) return alert("Escribe un rumor"); 
+            socket.emit('enviarRumor', { texto: t, escudo: usaEscudo, dobleFilo: usaDoble, aceptaReto: aceptaReto }); 
+            
+            document.getElementById('input-area').style.display = 'none';
+            document.getElementById('vote-wait-msg').style.display = 'block';
+            document.getElementById('wait-text-msg').innerText = "Rumor enviado. Esperando a los demás...";
+        }
+
+        socket.on('faseEscritura', (d) => { 
+            nav('view-game'); 
+            
+            soyLaVictimaActiva = d.esVictima;
+            
+            // LIMPIEZA EXTREMA: Borrar cualquier residuo visual de la ronda anterior
+            document.getElementById('vote-cards-container').innerHTML = '';
+            document.getElementById('vote-wait-msg').style.display = 'none';
+            document.getElementById('game-reaction-layer').innerHTML = ''; 
+            
+            document.getElementById('pu-escudo').checked = false; 
+            document.getElementById('pu-doble').checked = false; 
+            document.getElementById('pu-reto').checked = false; 
+            
+            if (d.turno === 0 && miRolEnSala !== 'espectador') {
+                let modeName = "MODO AMIGOS";
+                if (currentMeta === 300) modeName = "MODO PERSONALES";
+                if (currentMeta === 400) modeName = "MODO SECRETOS";
+                
+                const ann = document.getElementById('mode-announcement');
+                const txtAnn = document.getElementById('mode-announce-text');
+                txtAnn.innerText = "🔥 " + modeName + " 🔥";
+                
+                ann.style.display = 'none'; void ann.offsetWidth; ann.style.display = 'block';
+                setTimeout(() => { ann.style.display = 'none'; }, 3000);
+                speakFriendly("Que empiece el juego. " + modeName.toLowerCase()); 
+            }
+
+            if (d.esAbogado) { 
+                document.getElementById('role-title').innerHTML = `😈 ERES EL ABOGADO DEL DIABLO <br><span style="font-size:12px; color:#ff4757; font-weight:normal;">¡Inventa algo bueno sobre <b style="color:var(--accent-gold); text-transform:uppercase;">${d.nombreVictima}</b>! Si te elige, AMBOS PIERDEN 40 pts. Si no, AMBOS GANAN 40 pts.</span>`; 
+            } else { 
+                document.getElementById('role-title').innerHTML = d.msj; 
+            }
+            
+            document.getElementById('rumor-text').value = ""; 
+            
+            document.getElementById('rumors-progress-container').style.display = 'block';
+            document.getElementById('rumors-progress-text').innerText = `0 RUMORES RECIBIDOS...`;
+            document.getElementById('rumors-progress-fill').style.width = `0%`;
+
+            if (miRolEnSala === 'espectador') { 
+                document.getElementById('input-area').style.display = 'none'; 
+                document.getElementById('role-title').innerHTML = `👁️ MODO ESPECTADOR`; 
+                document.getElementById('vote-wait-msg').style.display = 'block'; 
+                document.getElementById('wait-text-msg').innerText = "Esperando a que los jugadores escriban sus rumores...";
+            } 
+            else if (soyLaVictimaActiva) { 
+                document.getElementById('input-area').style.display = 'none'; 
+                document.getElementById('vote-wait-msg').style.display = 'block';
+                document.getElementById('wait-text-msg').innerText = "Eres El Elegido. Esperando los rumores de los demás...";
+            } 
+            else { 
+                document.getElementById('input-area').style.display = 'block'; 
+                document.getElementById('vote-wait-msg').style.display = 'none'; 
+                
+                const sugContainer = document.getElementById('rumor-suggestions'); 
+                let pool = IDEAS_AMIGOS; if (currentMeta === 300) pool = IDEAS_PERSONALES; if (currentMeta === 400) pool = IDEAS_SECRETOS; 
+                const shuffled = pool.sort(() => 0.5 - Math.random()).slice(0, 3); 
+                sugContainer.innerHTML = shuffled.map(idea => `<button class="suggestion-chip" onclick="document.getElementById('rumor-text').value = '${idea}'; playPop();">${idea}</button>`).join(''); 
+            } 
+            
+            document.getElementById('vote-area').style.display = 'none'; 
+            if(timerInterval) clearInterval(timerInterval); 
+        });
+
+        socket.on('rumorRecibido', (d) => {
+            document.getElementById('rumors-progress-container').style.display = 'block';
+            document.getElementById('rumors-progress-text').innerText = `${d.recibidos}/${d.total} RUMORES RECIBIDOS...`;
+            document.getElementById('rumors-progress-fill').style.width = `${(d.recibidos / d.total) * 100}%`;
+            playPop(); 
+        });
+        
+        socket.on('faseVotacion', (data) => { 
+            document.getElementById('input-area').style.display='none'; 
+            document.getElementById('rumors-progress-container').style.display='none'; 
+            document.getElementById('vote-area').style.display='block'; 
+            document.getElementById('vote-wait-msg').style.display='block'; 
+            
+            const barHTML = `<div class="reaction-bar"><button class="btn btn-s" style="width:40px;height:40px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','👀')">👀</button><button class="btn btn-s" style="width:40px;height:40px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','😱')">😱</button><button class="btn btn-s" style="width:40px;height:40px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','🤣')">🤣</button><button class="btn btn-s" style="width:40px;height:40px;padding:0;border-radius:50%;" onclick="playPop(); socket.emit('lobbyReaction','💀')">💀</button></div>`;
+
+            if (soyLaVictimaActiva) { 
+                document.getElementById('vote-cards-container').innerHTML = data.rumores.map((v,i) => `<button class="btn btn-s" style="margin-bottom:10px; text-align:left; border:1px solid var(--accent-toxic); padding:15px; display:flex; flex-direction:column; gap:5px;" onclick="playClick(); socket.emit('elegirGanador',${v.originalIndex})"><div style="display:flex; justify-content:space-between; width:100%;"><span style="font-size:16px;">${v.texto}</span><span id="aud-vote-${v.originalIndex}" style="font-size:12px; color:var(--accent-toxic); font-weight:bold;"></span></div>${soyVip ? `<span style="font-size:11px; color:var(--accent-gold); font-weight:bold;">🕵️ Autor: ${v.autor}</span>` : ''}</button>`).join(''); 
+                document.getElementById('wait-text-msg').innerHTML = `<span style="color:var(--primary); font-weight:bold; font-size:14px;">¡Es tu turno de elegir el mejor rumor!</span>` + barHTML;
+            } else if (miRolEnSala === 'espectador') {
+                document.getElementById('vote-cards-container').innerHTML = data.rumores.map((v,i) => `<button class="btn btn-s" style="margin-bottom:10px; text-align:left; border:1px solid #555; padding:15px; display:flex; justify-content:space-between;" onclick="playPop(); socket.emit('votoAudiencia', ${v.originalIndex}); this.disabled=true; this.style.borderColor='var(--accent-toxic)';"><span style="font-size:16px;">${v.texto}</span><span id="aud-vote-${v.originalIndex}" style="font-size:12px; color:var(--accent-toxic); font-weight:bold;">Votar ⭐</span></button>`).join(''); 
+                document.getElementById('wait-text-msg').innerText = "La víctima está decidiendo...";
+            } else { 
+                document.getElementById('vote-cards-container').innerHTML = data.rumores.map((v,i) => `<div class="btn btn-s" style="margin-bottom:10px; text-align:left; border:1px solid rgba(255,255,255,0.1); padding:15px; display:flex; flex-direction:column; gap:5px; cursor:default;"><div style="display:flex; justify-content:space-between; width:100%;"><span style="font-size:16px; color:#fff;">${v.texto}</span><span id="aud-vote-${v.originalIndex}" style="font-size:12px; color:var(--accent-toxic); font-weight:bold;"></span></div>${soyVip ? `<span style="font-size:11px; color:var(--accent-gold); font-weight:bold;">🕵️ Autor: ${v.autor}</span>` : ''}</div>`).join(''); 
+                document.getElementById('wait-text-msg').innerText = "La víctima está decidiendo...";
+            } 
+            
+            const bar = document.getElementById('vote-timer-fill'); const txt = document.getElementById('timer-text'); bar.style.transition = 'none'; bar.style.width = '100%'; setTimeout(() => { bar.style.transition = 'width 30s linear'; bar.style.width = '0%'; }, 50); let timeLeft = 30; txt.innerText = "30s"; 
+            if(timerInterval) clearInterval(timerInterval); 
+            timerInterval = setInterval(() => { 
+                timeLeft--; txt.innerText = timeLeft + "s"; 
+                if (timeLeft === 5 && soyLaVictimaActiva) triggerVibration([200, 100, 200]); 
+                if(timeLeft <= 0) clearInterval(timerInterval); 
+            }, 1000); 
+        });
+
+        socket.on('tiempoAgotado', () => {
+            const boo = document.getElementById('sfx-boo');
+            if (boo) { boo.volume = sfxVolume; boo.play().catch(e=>{}); }
+        });
+
+        socket.on('audienciaVotoActualizado', (votos) => { Object.keys(votos).forEach(idx => { const el = document.getElementById(`aud-vote-${idx}`); if(el) el.innerText = `⭐ ${votos[idx]}`; }); });
+
+        socket.on('resultadoRonda', (d) => { 
+            nav('view-round-res'); 
+            let htmlEspecial = d.msjEspecial ? `<div style="background:rgba(255,71,87,0.2); border:1px solid #ff4757; color:#ff4757; padding:10px; border-radius:10px; font-weight:bold; font-size:12px; margin-bottom:15px;">${d.msjEspecial}</div>` : '';
+            document.getElementById('round-content').innerHTML = `
+                ${htmlEspecial}
+                <h3>Ganador: ${d.ganador}</h3>
+                <p style="font-style:italic; font-size:20px;">"${d.texto}"</p>
+                <div style="color:var(--accent-toxic); font-weight:bold; margin-top:10px;">${d.pts > 0 ? '+'+d.pts : d.pts} Puntos</div>
+            `; 
+        });
+        
+        socket.on('finDePartidaTotal', (d) => { 
+            nav('view-results'); 
+            mejorRumorGlobal = d.mejorRumor.texto || "Fui el más tóxico sin decir nada.";
+            document.getElementById('share-best-rumor').innerText = mejorRumorGlobal; document.getElementById('share-best-author').innerText = d.mejorRumor.autor || d.ganador;
+            document.getElementById('result-content').innerHTML = `<div style="font-size:60px; margin-bottom:10px;">🏆</div><h2 style="color:var(--accent-gold); font-size:30px; margin:0;">${d.ganador}</h2><p style="margin-top:5px; color:#aaa;">Llegó a los ${d.meta} puntos</p><p style="margin-top:5px; color:var(--accent-toxic); font-weight:bold;">¡Premio: +300 Coins!</p><div style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;"><div class="title-card"><span style="font-size:11px; color:var(--accent-toxic); text-transform:uppercase; font-weight:800; letter-spacing:1px;">💀 El Más Tóxico</span><strong style="font-size:18px;">${d.titulos.toxico}</strong><span style="font-size:10px; color:#aaa;">Sus rumores ganaron más veces</span></div><div class="title-card"><span style="font-size:11px; color:#ff7675; text-transform:uppercase; font-weight:800; letter-spacing:1px;">🎯 Blanco Fácil</span><strong style="font-size:18px;">${d.titulos.victima}</strong><span style="font-size:10px; color:#aaa;">Fue la víctima más veces</span></div></div>`; 
+            
+            const duration = 3 * 1000; const animationEnd = Date.now() + duration; const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999, colors: ['#FFD700', '#00d2d3', '#ff7e5f'] };
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                const particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+
+            document.getElementById('tension-bg').style.opacity = 0; 
+            document.getElementById('tension-bg').classList.remove('tension-pulse');
+            if(tensionInterval) { clearInterval(tensionInterval); tensionInterval = null; }
+        });
+
+        document.getElementById('logPass').addEventListener("keypress", function(event) { if (event.key === "Enter") { event.preventDefault(); login(); } });
+    </script>
+</body>
+</html>
