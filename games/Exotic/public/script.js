@@ -167,7 +167,11 @@ function renderizarTienda() {
 window.comprarItem = function(id) { socket.emit('comprarItem', id); };
 
 // =========================================================
+<<<<<<< Updated upstream
 // 🔥 LÓGICA DE SALAS Y JUEGO
+=======
+// 🔥 LÓGICA DE SALAS Y JUEGO 🔥
+>>>>>>> Stashed changes
 // =========================================================
 window.crear = function(modo) { unirseSala(Math.random().toString(36).substring(7).toUpperCase(), modo); };
 window.unirse = function() { const c = document.getElementById('code-input').value.toUpperCase(); if(c) unirseSala(c, null); };
@@ -182,6 +186,7 @@ function unirseSala(codigo, modo) {
 window.abandonarSala = function() { socket.emit('salirSalaExotic'); salaActual = ''; show('view-dash'); };
 window.addManual = function() { const nombre = document.getElementById('manual-name').value.trim(); if(nombre) { socket.emit('agregarJugadorManualExotic', { codigo: salaActual, nombre }); document.getElementById('manual-name').value = ''; } };
 window.enviarQueja = function() { const q = document.getElementById('lobby-queja').value.trim(); if(q) { socket.emit('nuevaQuejaGrupo', { codigo: salaActual, texto: q }); alert("Queja enviada al buzón anónimo 🤫"); document.getElementById('lobby-queja').value = ''; } };
+<<<<<<< Updated upstream
 window.iniciar = function() { nextTurn(); };
 
 function nextTurn() {
@@ -199,25 +204,111 @@ window.pedirCastigo = function() { socket.emit('pedirCastigoExotic', { codigo: s
 window.activarRuleta = function() { document.getElementById('box-ruleta').classList.add('hidden'); socket.emit('girarRuletaDiablo', salaActual); };
 
 window.intentarSoborno = function() { if(user.monedas < 200) return alert("No tienes suficientes monedas (Cuesta 200 🪙)."); socket.emit('pedirListaSoborno', salaActual); };
+=======
+
+// 🔥 EL FIX DE TURNOS Y BOTONES 🔥
+window.iniciar = function() { 
+    show('view-game'); 
+    socket.emit('siguienteTurnoExotic', salaActual); 
+};
+
+window.nextTurn = function() {
+    document.getElementById('box-decision').classList.add('hidden'); 
+    document.getElementById('btn-after-punish').classList.add('hidden'); 
+    document.getElementById('box-crear-regla').classList.add('hidden');
+    socket.emit('siguienteTurnoExotic', salaActual);
+};
+
+window.ask = function(nivelDificultad) { 
+    document.getElementById('card-text').innerText = "Cargando Reto..."; 
+    document.getElementById('box-controls').style.display = 'none'; 
+    socket.emit('pedirRetoExotic', { codigo: salaActual, nivel: nivelDificultad }); 
+};
+
+window.pedirCastigo = function() { 
+    socket.emit('pedirCastigoExotic', { codigo: salaActual, usuario: user.loginName }); 
+    document.getElementById('box-decision').classList.add('hidden'); 
+    document.getElementById('btn-after-punish').classList.remove('hidden'); 
+};
+
+window.activarRuleta = function() { 
+    document.getElementById('box-ruleta').classList.add('hidden'); 
+    socket.emit('girarRuletaDiablo', salaActual); 
+};
+
+window.intentarSoborno = function() { 
+    if(user.monedas < 200) return alert("No tienes suficientes monedas (Cuesta 200 🪙)."); 
+    socket.emit('pedirListaSoborno', salaActual); 
+};
+
+>>>>>>> Stashed changes
 socket.on('mostrarModalSoborno', (jugadores) => {
     const lista = document.getElementById('lista-sobornables');
     lista.innerHTML = jugadores.map(j => `<button class="main-btn" style="background:#4b0082;" onclick="ejecutarSoborno('${j.nombre}')">${j.exotic_name || j.nombre}</button>`).join('');
     document.getElementById('soborno-modal').classList.remove('hidden');
 });
 
+<<<<<<< Updated upstream
 window.ejecutarSoborno = function(target) { socket.emit('ejecutarSoborno', { codigo: salaActual, de: user.loginName, para: target, reto: retoActualText }); document.getElementById('soborno-modal').classList.add('hidden'); document.getElementById('box-decision').classList.add('hidden'); };
 window.enviarRegla = function() { const regla = document.getElementById('input-nueva-regla').value.trim(); if(regla) { socket.emit('imponerRegla', { codigo: salaActual, texto: regla }); document.getElementById('box-crear-regla').classList.add('hidden'); document.getElementById('btn-after-punish').classList.remove('hidden'); } };
+=======
+window.ejecutarSoborno = function(target) { 
+    socket.emit('ejecutarSoborno', { codigo: salaActual, de: user.loginName, para: target, reto: retoActualText }); 
+    document.getElementById('soborno-modal').classList.add('hidden'); 
+    document.getElementById('box-decision').classList.add('hidden'); 
+};
+
+window.enviarRegla = function() { 
+    const regla = document.getElementById('input-nueva-regla').value.trim(); 
+    if(regla) { 
+        socket.emit('imponerRegla', { codigo: salaActual, texto: regla }); 
+        document.getElementById('box-crear-regla').classList.add('hidden'); 
+        document.getElementById('btn-after-punish').classList.remove('hidden'); 
+    } 
+};
+>>>>>>> Stashed changes
 
 socket.on('actualizarSalaExotic', (sala) => {
     const list = document.getElementById('player-list');
     if(list) list.innerHTML = sala.jugadores.map(j => `<div class="p-row"><span>${j.avatar || '👤'}</span> ${j.exotic_name || j.nombre}</div>`).join('');
+<<<<<<< Updated upstream
     const btnStart = document.getElementById('btn-start'); if(btnStart && sala.jugadores.length > 1) btnStart.classList.remove('hidden');
+=======
+    const btnStart = document.getElementById('btn-start'); 
+    if(btnStart && sala.jugadores.length > 1) btnStart.classList.remove('hidden');
+>>>>>>> Stashed changes
     if(sala.modo === 'grupo') document.getElementById('buzon-container').classList.remove('hidden');
 });
 
 socket.on('cambioDeTurnoExotic', ({ actor, pacto, regla }) => {
     esMiTurno = (actor.nombre === user.loginName);
     document.getElementById('turn-display').innerText = `Turno de: ${actor.exotic_name || actor.nombre}`;
+<<<<<<< Updated upstream
+=======
+    
+    document.getElementById('card-text').innerText = "PREPÁRATE"; 
+    document.getElementById('card-text').classList.remove('ruleta-animacion'); 
+    document.getElementById('target-text').innerText = ""; 
+    document.getElementById('card-icon').innerText = "🔥";
+    document.getElementById('box-decision').classList.add('hidden'); 
+    document.getElementById('btn-after-punish').classList.add('hidden'); 
+    document.getElementById('box-crear-regla').classList.add('hidden');
+    
+    if (esMiTurno) {
+        if (currentTemp >= 100) { 
+            document.getElementById('box-controls').style.display = 'none'; 
+            document.getElementById('box-ruleta').classList.remove('hidden'); 
+        } else { 
+            document.getElementById('box-controls').style.display = 'flex'; 
+            document.getElementById('box-ruleta').classList.add('hidden'); 
+        }
+    } else {
+        document.getElementById('box-controls').style.display = 'none'; 
+        document.getElementById('box-ruleta').classList.add('hidden'); 
+        document.getElementById('card-text').innerText = "Esperando que el jugador elija...";
+    }
+    
+>>>>>>> Stashed changes
     if(pacto && pacto.length > 0) { document.getElementById('pacto-alert').classList.remove('hidden'); document.getElementById('pacto-nombres').innerText = pacto.join(' y '); } else { document.getElementById('pacto-alert').classList.add('hidden'); }
     if(regla && regla.turnos > 0) { document.getElementById('regla-alert').classList.remove('hidden'); document.getElementById('regla-texto').innerText = regla.texto; document.getElementById('regla-turnos').innerText = regla.turnos; } else { document.getElementById('regla-alert').classList.add('hidden'); }
 });
@@ -229,7 +320,18 @@ socket.on('eventoEspecialGrupo', ({ tipo, texto }) => {
 socket.on('resultadoRetoExotic', ({ texto, victima, nivel }) => {
     retoActualText = texto;
     document.getElementById('card-text').classList.remove('ruleta-animacion'); document.getElementById('card-text').innerText = texto; document.getElementById('target-text').innerText = `PARA: ${victima}`; document.getElementById('card-icon').innerText = "😈"; document.getElementById('box-decision').classList.remove('hidden'); 
+<<<<<<< Updated upstream
     if (esMiTurno && document.getElementById('buzon-container').classList.contains('hidden') === false) { document.getElementById('btn-soborno').classList.remove('hidden'); } else { document.getElementById('btn-soborno').classList.add('hidden'); }
+=======
+    
+    // Mostramos botón de soborno solo si es su turno y están en grupo (tiene buzon-container)
+    let buzon = document.getElementById('buzon-container');
+    if (esMiTurno && buzon && buzon.classList.contains('hidden') === false) { 
+        document.getElementById('btn-soborno').classList.remove('hidden'); 
+    } else { 
+        document.getElementById('btn-soborno').classList.add('hidden'); 
+    }
+>>>>>>> Stashed changes
     if(esMiTurno && (nivel === 3 || nivel === 4)) { document.getElementById('box-crear-regla').classList.remove('hidden'); document.getElementById('box-decision').classList.add('hidden'); }
 });
 

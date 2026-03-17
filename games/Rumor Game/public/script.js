@@ -116,5 +116,43 @@ socket.on('faseResultados', (data) => {
         <p>${acertantes.length > 0 ? acertantes.length + " jugadores" : "Nadie acertó 😢"}</p>
     `;
 });
+function handleCredentialResponse(response) {
+    // 1. Decodificamos el token de Google para sacar el email
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    const email = payload.email;
+    
+    // 2. Le preguntamos al servidor si ese email ya tiene cuenta
+    fetch('/api/google-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+    }).then(res => res.json()).then(data => {
+        if (data.exists) {
+            // YA TIENE CUENTA: Guardamos en memoria y recargamos
+            localStorage.setItem('toxic_user', data.user.nombre);
+            localStorage.setItem('toxic_pass', 'google');
+            window.location.reload(); 
+        } else {
+            // ES NUEVO: Le pedimos que elija su nombre tóxico
+            let nombre = prompt("¡Bienvenido! Ingresa el nombre de usuario que usarás en la plataforma:");
+            if(nombre) {
+                // Lo registramos en la base de datos
+                fetch('/api/google-register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, nombre: nombre, avatar: payload.picture })
+                }).then(res => res.json()).then(regData => {
+                    if(regData.success) {
+                        localStorage.setItem('toxic_user', nombre);
+                        localStorage.setItem('toxic_pass', 'google');
+                        window.location.reload();
+                    } else {
+                        alert(regData.msg); // Aviso si el nombre está ocupado
+                    }
+                });
+            }
+        }
+    });
+}
 
 socket.on('tick', (t) => document.getElementById('reloj').innerText = t + "s");
