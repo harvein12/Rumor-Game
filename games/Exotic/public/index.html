@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXOTIC - RED ROOM</title>
+    <link rel="stylesheet" href="/exotic/style.css">
+</head>
+<body>
+
+    <audio id="exotic-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3?filename=dark-ambient-126122.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="view-auth" class="view active">
+        
+        <div class="glowing-box" id="box-jugar">
+            <div class="glowing-box-icon">🔥</div>
+            <h1 class="neon-title" style="font-size: 4rem;">EXOTIC</h1>
+            <p class="subtitle">Solo para mentes retorcidas</p>
+            
+            <div style="display: flex; gap: 15px; justify-content: center; align-items: center; margin-top: 30px;">
+                <button class="outline-btn pulsing" style="flex: 1;" onclick="mostrarAdvertencia()">🔥 JUGAR 🔥</button>
+                <button class="outline-btn" style="padding: 16px 20px; width: auto;" onclick="abrirReglasLibrito()">📖</button>
+            </div>
+            
+            <p style="color: #666; font-size: 0.8rem; margin-top: 25px; font-style: italic;">*Conectado automáticamente a Toxic Platform</p>
+        </div>
+
+        <div class="glowing-box hidden" id="box-login-fallback">
+            <div class="glowing-box-icon">🔒</div>
+            <h1 class="neon-title" style="font-size: 2rem; margin-top: 10px;">VERIFICACIÓN</h1>
+            <p class="subtitle" style="margin-bottom: 25px;">Confirma tu identidad de la Plataforma Base.</p>
+            <div id="f-login" style="text-align: left;">
+                <label style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px; display: block;">Tu usuario original</label>
+                <input type="text" id="l-user" placeholder="Usuario">
+
+                <label style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px; display: block; margin-top: 10px;">Contraseña</label>
+                <input type="password" id="l-pass" placeholder="Contraseña">
+
+                <button class="outline-btn" style="margin-top: 15px;" onclick="loginManual()">VERIFICAR Y ENTRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-dash" class="view">
+        <div class="app-container">
+            <aside class="sidebar">
+                <div class="brand"><h1 class="neon-title-small">EXOTIC</h1></div>
+                <nav class="menu">
+                    <a class="nav-link active" onclick="cambiarSeccion('sec-juegos', this)">🔥 Red Room</a>
+                    <a class="nav-link" onclick="cambiarSeccion('sec-retos', this)">📜 Retos</a>
+                    <a class="nav-link" onclick="cambiarSeccion('sec-fama', this)">🏆 Fama</a>
+                    <a class="nav-link" onclick="cambiarSeccion('sec-tienda', this)">💎 Mercado</a>
+                    <a class="nav-link" onclick="cambiarSeccion('sec-perfil', this)">👤 Mi Perfil</a>
+                    <a id="nav-admin" class="nav-link hidden" style="color: #ffcc00;" onclick="cambiarSeccion('sec-admin', this); socket.emit('pedirRetosPendientes');">🛡️ Admin</a>
+                    <a class="nav-link" style="margin-top: 20px; color: #a1a1a1;" onclick="abrirConfig()">⚙️ Configuración</a>
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <header class="top-bar">
+                    <span class="username"><span id="user-av">😈</span> <span id="welcome-name">Jugador</span></span>
+                    <div class="top-bar-right">
+                        <div class="stats">
+                            <div class="stat-item gold">🪙 <span id="user-coins">0</span></div>
+                            <div class="stat-item gems">💎 <span id="user-gems">0</span></div>
+                        </div>
+                        <button class="mobile-settings-btn" onclick="abrirConfig()">⚙️</button>
+                    </div>
+                </header>
+
+                <div class="content-body">
+                    <div id="sec-juegos" class="dashboard-section active-sec">
+                        <h2 class="section-title">Elige tu Veneno</h2>
+                        <div class="game-grid">
+                            <div class="game-card">
+                                <div class="card-image parejas-bg"><span class="icon">❤️‍🔥</span></div>
+                                <div class="card-info">
+                                    <h3>Parejas</h3>
+                                    <button class="main-btn" onclick="crear('parejas')">Crear Sala Íntima</button>
+                                </div>
+                            </div>
+                            <div class="game-card">
+                                <div class="card-image grupo-bg"><span class="icon">🍷</span></div>
+                                <div class="card-info">
+                                    <h3>Grupo (Caos Total)</h3>
+                                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Pactos, Sobornos y Traiciones.</p>
+                                    <button class="main-btn" style="background: #800080; border-color: #800080;" onclick="crear('grupo')">Crear Sala Grupal</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="friend-code-section" style="margin-top:30px;">
+                            <p style="text-align: center; font-weight: bold; margin-bottom: 10px;">¿CÓDIGO DE SALA?</p>
+                            <div class="code-input-group">
+                                <input type="text" placeholder="Ingresa el código" id="code-input">
+                                <button class="main-btn" onclick="unirse()">ENTRAR</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sec-retos" class="dashboard-section">
+                        <div class="toxic-input-container">
+                            <p style="color: var(--accent); font-weight: bold; margin-bottom: 20px;">CREA UN RETO SEXUAL PARA LA COMUNIDAD</p>
+                            <textarea id="fama-reto" placeholder="Escribe el reto más salvaje..."></textarea>
+                            <div style="display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                                <select id="fama-modo"><option value="grupo">Para: GRUPO 🍷</option><option value="parejas">Para: PAREJAS ❤️‍🔥</option></select>
+                                <label style="color: var(--text-muted);">Castigo:</label>
+                                <select id="fama-shots"><option value="1">1 Shot 🍷</option><option value="2">2 Shots 🍷🍷</option><option value="3">3 Shots 🍷🍷🍷</option><option value="4">4 Shots 🍷🍷🍷🍷</option><option value="5">5 Shots 💀</option></select>
+                                <button class="main-btn" style="width: auto;" onclick="enviarRetoFama()">ENVIAR A REVISIÓN</button>
+                            </div>
+                        </div>
+                        <div class="game-card" style="padding: 30px; margin-top: 30px; background: transparent;"><h3 style="color: #c28599; text-align: center; margin-bottom: 25px;">📜 ÚLTIMOS RETOS APROBADOS</h3><div id="lista-retos-comunidad" class="player-list-container"></div></div>
+                    </div>
+
+                    <div id="sec-fama" class="dashboard-section">
+                        <h2 class="section-title" style="color: #ffcc00;">🏆 Salón de la Fama</h2>
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <div class="game-card" style="flex: 1; padding: 20px; border: 1px solid #ffcc00;"><h3 style="color: var(--gold-btn); text-align: center;">🔥 MÁS PARTIDAS</h3><div id="ranking-partidas"></div></div>
+                            <div class="game-card" style="flex: 1; padding: 20px; border: 1px solid #ffcc00;"><h3 style="color: var(--gold-btn); text-align: center;">😈 MÁS RETOS</h3><div id="ranking-retos"></div></div>
+                        </div>
+                    </div>
+
+                    <div id="sec-tienda" class="dashboard-section">
+                        <h2 class="section-title" style="color: var(--accent);">💎 Mercado Exótico</h2>
+                        <div id="tienda-grid" class="game-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));"></div>
+                    </div>
+
+                    <div id="sec-perfil" class="dashboard-section">
+                        <h2 class="section-title">Tu Identidad</h2>
+                        <div class="profile-card">
+                            <div class="profile-avatar" id="display-profile-avatar">😈</div>
+                            <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 5px;">
+                                <h3 id="profile-name-display" style="margin: 0; font-size: 2.2rem;">Jugador</h3>
+                                <button class="ghost-btn" style="width: auto; padding: 5px 10px;" onclick="abrirModalEditar()">✏️ Editar</button>
+                            </div>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">(ID Original: <span id="profile-login-id"></span>)</p>
+                            <hr class="divider">
+                            <div class="profile-stats">
+                                <div class="p-stat"><span>Monedas</span><br><b id="profile-coins-display2" style="color: var(--gold-btn);">0</b></div>
+                                <div class="p-stat"><span>Gemas</span><br><b id="profile-gems-display2" style="color: #ff0055;">0</b></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sec-admin" class="dashboard-section">
+                        <h2 class="section-title" style="color: #ffcc00;">🛡️ Panel de Moderación</h2>
+                        <div class="game-card" style="padding: 30px; border: 1px solid #ffcc00; background: transparent;"><div id="admin-retos-list" style="display: flex; flex-direction: column; gap: 15px;"></div></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <nav class="bottom-nav">
+            <a class="nav-link active" onclick="cambiarSeccion('sec-juegos', this)">🔥</a>
+            <a class="nav-link" onclick="cambiarSeccion('sec-retos', this)">📜</a>
+            <a class="nav-link" onclick="cambiarSeccion('sec-fama', this)">🏆</a>
+            <a class="nav-link" onclick="cambiarSeccion('sec-tienda', this)">💎</a>
+            <a class="nav-link" onclick="cambiarSeccion('sec-perfil', this)">👤</a>
+        </nav>
+    </div>
+
+    <div id="view-lobby" class="view">
+        <div class="center-box">
+            <button class="btn-exit-game" onclick="abandonarSala()">✖ Salir</button>
+            <h2>SALA: <span id="room-code" class="neon-text">---</span></h2>
+            <div id="player-list" class="player-list-container"></div>
+            <div class="manual-add"><input type="text" id="manual-name" placeholder="Añadir jugador físico"><button class="main-btn" onclick="addManual()">Añadir</button></div>
+            <button id="btn-start" class="main-btn hidden" onclick="iniciar()" style="margin-top: 20px;">🔥 COMENZAR CAOS 🔥</button>
+        </div>
+    </div>
+
+    <div id="view-game" class="view">
+        <div class="center-box" style="max-width: 600px;">
+            <button class="btn-exit-game" onclick="abandonarSala()">✖ Abandonar</button>
+            <h2 id="turn-display">Turno de...</h2>
+            <div class="heat-meter-container"><div class="heat-meter-label">🔥 TEMPERATURA: <span id="heat-value">0%</span> 🔥</div><div class="heat-meter-bg"><div id="heat-bar" class="heat-meter-fill"></div></div></div>
+            <div id="main-card" class="action-card"><div id="card-icon">🔥</div><h3 id="card-text">PREPÁRATE</h3><p id="target-text"></p></div>
+            <div id="box-controls" class="controls-row"><button class="btn-nivel btn-facil" onclick="ask(1)">SUAVE</button><button class="btn-nivel btn-medio" onclick="ask(2)">CALIENTE</button><button class="btn-nivel btn-exotic" onclick="ask(3)">EXOTIC</button></div>
+            <div id="box-ruleta" class="controls-row hidden"><button class="btn-ruleta-diablo" onclick="activarRuleta()">🎰 GIRAR RULETA DEL DIABLO 🎰</button></div>
+            <div id="box-decision" class="controls-row hidden" style="flex-wrap: wrap;"><button class="btn-next" onclick="nextTurn()">Siguiente</button><button class="btn-punish" onclick="pedirCastigo()">¡Castigo!</button></div>
+            <div id="btn-after-punish" class="controls-row hidden"><button class="btn-next" onclick="nextTurn()">Continuar</button></div>
+        </div>
+    </div>
+
+    <div id="edit-profile-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <h2 style="color: var(--accent); margin-bottom: 20px;">✏️ Editar Identidad</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <label style="color: var(--text-muted); text-align: left; font-weight: bold;">Elige tu Avatar de la Tienda:</label>
+                <div id="avatar-selection-grid"></div>
+                <input type="hidden" id="edit-avatar-input">
+                <label style="color: var(--text-muted); text-align: left; font-weight: bold; margin-top: 10px;">Alias de la Red Room:</label>
+                <input type="text" id="edit-name-input" placeholder="Tu seudónimo...">
+                <div style="display: flex; gap: 10px; margin-top: 10px;"><button class="main-btn" onclick="guardarPerfil()">GUARDAR</button><button class="ghost-btn" onclick="document.getElementById('edit-profile-modal').classList.add('hidden')">Cancelar</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="config-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 style="color: var(--gold-btn); margin-bottom: 25px;">⚙️ Configuración</h2>
+            <div style="margin-bottom: 35px;">
+                <label style="color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 12px;">🎧 Volumen de la Música</label>
+                <input type="range" id="volumen-slider" min="0" max="100" value="30" style="width: 85%;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <button class="exit-btn" onclick="window.location.href='/'">⬅ Exit to Toxic Platform</button>
+                <button class="ghost-btn" onclick="cerrarConfig()">Volver a la Red Room</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rules-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 500px; text-align: left;">
+            <h2 class="neon-title" style="text-align: center; margin-bottom: 20px;">📜 REGLAS RED ROOM</h2>
+            <ul style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.6; list-style:none;">
+                <li style="margin-bottom: 12px;">🩸 <b>Choose your poison:</b> Crea una sala para Parejas ❤️‍🔥 o desata el Caos Total en Grupo 🍷.</li>
+                <li style="margin-bottom: 12px;">🩸 <b>Nivel de Toxicidad:</b> Suave, Caliente, o el extremo modo EXOTIC 😈.</li>
+                <li style="margin-bottom: 12px;">🩸 <b>Diablo Roulette:</b> Si la temperatura llega al 100%, la ruleta decide el destino de todos. 🎰</li>
+                <li style="margin-bottom: 12px;">🩸 <b>Mercado Exótico:</b> Tus Monedas y Gemas de Toxic Platform están unificadas. 💎</li>
+            </ul>
+            <button class="main-btn" style="margin-top: 20px;" onclick="cerrarReglasLibrito()">ENTENDIDO</button>
+        </div>
+    </div>
+
+    <div id="age-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 450px; text-align: center;">
+            <h2 class="neon-title" style="font-size: 2.2rem; margin-bottom: 15px;">⚠️ SEGURIDAD</h2>
+            <p style="color: var(--text-muted); margin-bottom: 25px; line-height: 1.5;">Estás a punto de ingresar a una zona explícita, sin censura y con retos físicos. Todo lo que pasa aquí requiere <b>acuerdo mutuo</b> y ser <b>mayor de 18 años</b>.</p>
+            <div class="modal-buttons">
+                <button class="main-btn pulsing" onclick="aceptarEdad()">SÍ, SOY +18 Y ACEPTO 😈</button>
+                <button class="exit-btn" onclick="window.location.href='/'">No, Exit to Toxic Platform</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="soborno-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 style="color: var(--gold-btn);">💸 ¿A QUIÉN QUIERES JODER?</h2>
+            <p>Pasar tu reto cuesta 200 Monedas.</p>
+            <div id="lista-sobornables" style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;"></div>
+            <button class="ghost-btn" onclick="document.getElementById('soborno-modal').classList.add('hidden')">Cancelar</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/exotic/script.js"></script>
+</body>
+</html>
