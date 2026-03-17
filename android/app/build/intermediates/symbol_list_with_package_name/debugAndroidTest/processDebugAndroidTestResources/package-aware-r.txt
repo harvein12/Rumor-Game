@@ -1,3 +1,0 @@
-com.Angel.toxic.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme
