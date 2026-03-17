@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Toxic Platform</string>
-    <string name="title_activity_main">Toxic Platform</string>
-    <string name="package_name">com.Angel.toxic</string>
-    <string name="custom_url_scheme">com.Angel.toxic</string>
-</resources>
